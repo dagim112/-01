@@ -79,6 +79,31 @@ body {
     color: #cccccc;
     cursor: pointer;
 }
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 80%;
+    margin: 40px auto;
+}
+
+.dash-btn {
+    background: #1f1f1f;
+    color: white;
+    padding: 25px;
+    font-size: 22px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #000;
+    transition: 0.2s;
+}
+
+.dash-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #000;
+}
+
 
 
 
