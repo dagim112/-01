@@ -106,6 +106,16 @@ function createAccount() {
     alert("Account created successfully!");
     showLogin();
 }
+function selectRole(role) {
+    document.getElementById("role-screen").style.display = "none";
+
+    if (role === "admin") {
+        document.getElementById("admin-screen").style.display = "block";
+    } else {
+        document.getElementById("worker-screen").style.display = "block";
+    }
+}
+
 
 
 
