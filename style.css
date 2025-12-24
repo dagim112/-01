@@ -107,28 +107,48 @@ body {
 .top-bar {
     display: flex;
     justify-content: space-between;
-    padding: 15px 25px;
+    align-items: center;
     background: #1a1a1a;
-    font-size: 18px;
+    padding: 15px 20px;
+    color: white;
+    font-size: 20px;
+}
+
+.menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.lang-selector {
+    font-size: 16px;
     color: #ccc;
 }
 
-/* SECTION TITLE */
+/* DATE BAR */
+.date-bar {
+    text-align: center;
+    font-size: 16px;
+    color: #aaa;
+    margin-top: 10px;
+}
+
+/* SECTION TITLE + NUMBER */
 .section-title {
     font-size: 20px;
     margin-top: 30px;
     color: #aaa;
+    text-align: center;
 }
 
-/* BIG NUMBER */
 .big-number {
     font-size: 48px;
     font-weight: bold;
     margin: 10px 0 30px;
     color: #00ffcc;
+    text-align: center;
 }
 
-/* CHART PLACEHOLDER */
+/* CHART */
 .chart-placeholder {
     background: #2a2a2a;
     border-radius: 12px;
@@ -140,43 +160,81 @@ body {
     text-align: center;
 }
 
-/* GRID BUTTONS */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+/* BUTTON ROWS */
+.action-row {
+    display: flex;
+    justify-content: center;
     gap: 20px;
-    width: 80%;
-    margin: 40px auto;
+    margin: 30px 0;
+    flex-wrap: wrap;
 }
 
-/* BUTTON STYLE */
-.dash-btn {
-    background: #1f1f1f;
-    color: white;
-    padding: 25px;
-    font-size: 22px;
+.action-btn {
+    padding: 20px 30px;
+    font-size: 18px;
     border: none;
     border-radius: 12px;
-    cursor: pointer;
     box-shadow: 0 4px 0 #000;
+    cursor: pointer;
     transition: 0.2s;
+    min-width: 160px;
 }
 
-.dash-btn:active {
+.action-btn:active {
     transform: translateY(4px);
     box-shadow: 0 0 0 #000;
 }
 
-/* COLOR BUTTONS */
-.dash-btn.green {
+.action-btn.blue {
+    background: #005eff;
+    color: white;
+}
+
+.action-btn.orange {
+    background: #ff6600;
+    color: white;
+}
+
+.action-btn.green {
     background: #006600;
     color: #ccffcc;
 }
 
-.dash-btn.orange {
-    background: #993300;
-    color: #ffddcc;
+/* ICONS */
+.icon-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 30px 0;
+    flex-wrap: wrap;
 }
+
+.icon-box {
+    background: #2a2a2a;
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    box-shadow: 0 4px 0 #000;
+    transition: 0.2s;
+}
+
+.icon-box:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #000;
+}
+
+.icon-label {
+    font-size: 14px;
+    color: #ccc;
+    margin-top: 8px;
+    text-align: center;
+}
+
 
 
 
