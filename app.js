@@ -97,3 +97,12 @@ function createAccount() {
     showLogin();
 }
 
+
+    // Save user (temporary)
+    localStorage.setItem("savedUser", user);
+    localStorage.setItem("savedPass", pass);
+
+    alert("Account created successfully!");
+    showLogin();
+}
+
