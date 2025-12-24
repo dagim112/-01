@@ -1,35 +1,44 @@
-// TRANSLATIONS
+// LOGIN + SIGNUP TRANSLATIONS
 const translations = {
     am: {
         loginTitle: "መግቢያ",
         username: "ኢሜይል ወይም ስልክ",
         password: "የይለፍ ቃል",
         loginBtn: "መግቢያ",
-        signupLink: "አካውንት የለህም? መመዝገብ"
+        signupLink: "አካውንት የለህም? መመዝገብ",
+        signupTitle: "መመዝገብ",
+        signupBtn: "መመዝገብ",
+        loginLink: "አካውንት አለህ? መግቢያ"
     },
     om: {
         loginTitle: "Seensa",
         username: "Imeelii yookiin Bilbila",
         password: "Jecha Darbii",
         loginBtn: "Seeni",
-        signupLink: "Herrega hin qabduu? Galmaa'i"
+        signupLink: "Herrega hin qabduu? Galmaa'i",
+        signupTitle: "Galmaa'i",
+        signupBtn: "Galmaa'i",
+        loginLink: "Herrega qabdaa? Seeni"
     },
     en: {
         loginTitle: "Login",
         username: "Email or Phone",
         password: "Password",
         loginBtn: "Login",
-        signupLink: "Don't have an account? Sign up"
+        signupLink: "Don't have an account? Sign up",
+        signupTitle: "Sign Up",
+        signupBtn: "Create Account",
+        loginLink: "Already have an account? Login"
     }
 };
 
-// LANGUAGE SELECTION
+// SET LANGUAGE
 function setLanguage(lang) {
     localStorage.setItem("appLanguage", lang);
     showLogin();
 }
 
-// SHOW LOGIN SCREEN
+// SHOW LOGIN
 function showLogin() {
     document.getElementById("language-screen").style.display = "none";
     document.getElementById("login-screen").style.display = "block";
@@ -44,40 +53,7 @@ function showLogin() {
     document.getElementById("signup-link").innerText = t.signupLink;
 }
 
-// TEMPORARY LOGIN LOGIC
-function loginUser() {
-    let user = document.getElementById("login-username").value;
-    let pass = document.getElementById("login-password").value;
-
-    if (user === "" || pass === "") {
-        alert("Please fill all fields");
-        return;
-    }
-
-    showRoleScreen();
-}
-function showRoleScreen() {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("signup-screen").style.display = "none";
-    document.getElementById("role-screen").style.display = "block";
-}
-function selectRole(role) {
-    alert("You selected: " + role);
-    // Later we will open the dashboard here
-}
-
-
-translations.am.signupTitle = "መመዝገብ";
-translations.am.signupBtn = "መመዝገብ";
-translations.am.loginLink = "አካውንት አለህ? መግቢያ";
-
-translations.om.signupTitle = "Galmaa'i";
-translations.om.signupBtn = "Galmaa'i";
-translations.om.loginLink = "Herrega qabdaa? Seeni";
-
-translations.en.signupTitle = "Sign Up";
-translations.en.signupBtn = "Create Account";
-translations.en.loginLink = "Already have an account? Login";
+// SHOW SIGNUP
 function showSignup() {
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("signup-screen").style.display = "block";
@@ -91,6 +67,8 @@ function showSignup() {
     document.getElementById("signup-btn").innerText = t.signupBtn;
     document.getElementById("login-link").innerText = t.loginLink;
 }
+
+// CREATE ACCOUNT
 function createAccount() {
     let user = document.getElementById("signup-username").value;
     let pass = document.getElementById("signup-password").value;
@@ -106,15 +84,27 @@ function createAccount() {
     alert("Account created successfully!");
     showLogin();
 }
-function selectRole(role) {
-    document.getElementById("role-screen").style.display = "none";
 
-    if (role === "admin") {
-        document.getElementById("admin-screen").style.display = "block";
-    } else {
-        document.getElementById("worker-screen").style.display = "block";
+// SHOW ROLE SCREEN
+function loginUser() {
+    let user = document.getElementById("login-username").value;
+    let pass = document.getElementById("login-password").value;
+
+    if (user === "" || pass === "") {
+        alert("Please fill all fields");
+        return;
     }
+
+    showRoleScreen();
 }
+
+function showRoleScreen() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("signup-screen").style.display = "none";
+    document.getElementById("role-screen").style.display = "block";
+}
+
+// DASHBOARD TRANSLATIONS
 const dashboardTranslations = {
     am: {
         adminTitle: "የእርምራ ለመመልከት ቁጥር",
@@ -156,6 +146,8 @@ const dashboardTranslations = {
         appTitle: "Tikure"
     }
 };
+
+// CHANGE ADMIN LANGUAGE
 function changeDashboardLanguage(lang) {
     localStorage.setItem("appLanguage", lang);
     const t = dashboardTranslations[lang];
@@ -172,10 +164,11 @@ function changeDashboardLanguage(lang) {
     document.getElementById("export-label").innerText = t.export;
     document.getElementById("top-date").innerText = t.date;
 
-    // Also sync the dropdown with selected language
     const select = document.getElementById("lang-select");
     if (select) select.value = lang;
 }
+
+// SELECT ROLE
 function selectRole(role) {
     document.getElementById("role-screen").style.display = "none";
 
@@ -186,9 +179,10 @@ function selectRole(role) {
         initStockChart();
     } else {
         document.getElementById("worker-screen").style.display = "block";
-        // later we can also init worker language
     }
 }
+
+// PIE CHART
 let stockChart;
 
 function initStockChart() {
@@ -202,20 +196,14 @@ function initStockChart() {
         }]
     };
 
-    if (stockChart) {
-        stockChart.destroy();
-    }
+    if (stockChart) stockChart.destroy();
 
     stockChart = new Chart(ctx, {
         type: "pie",
         data: data,
         options: {
             plugins: {
-                legend: {
-                    labels: {
-                        color: "#ffffff"
-                    }
-                }
+                legend: { labels: { color: "#ffffff" } }
             }
         }
     });
@@ -234,13 +222,3 @@ function updateStockChart() {
     document.getElementById("total-value").innerText = total.toLocaleString();
 }
 
-
-
-
-
-
-
-
-    
-
-  
