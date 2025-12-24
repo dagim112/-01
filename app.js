@@ -54,8 +54,9 @@ function loginUser() {
         return;
     }
 
-    alert("Login successful (temporary)");
+    showRoleScreen();
 }
+
 translations.am.signupTitle = "መመዝገብ";
 translations.am.signupBtn = "መመዝገብ";
 translations.am.loginLink = "አካውንት አለህ? መግቢያ";
