@@ -1,1 +1,50 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: #0d0d0d;
+    font-family: Arial, sans-serif;
+    color: white;
+    text-align: center;
+}
+
+.screen {
+    display: none;
+    padding-top: 80px;
+}
+
+#language-screen {
+    display: block;
+}
+
+.app-title {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.choose-text {
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.language-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 60%;
+    margin: auto;
+}
+
+.lang-btn {
+    padding: 15px;
+    font-size: 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #1f1f1f;
+    color: white;
+}
+
+.lang-btn.default {
+    background: #005eff;
+}
 
