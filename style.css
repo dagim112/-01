@@ -47,6 +47,7 @@ body {
 .lang-btn.default {
     background: #005eff;
 }
+
 .input-group {
     margin: 15px auto;
     width: 70%;
@@ -78,5 +79,6 @@ body {
     color: #cccccc;
     cursor: pointer;
 }
+
 
 
