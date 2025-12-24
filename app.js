@@ -56,6 +56,16 @@ function loginUser() {
 
     showRoleScreen();
 }
+function showRoleScreen() {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("signup-screen").style.display = "none";
+    document.getElementById("role-screen").style.display = "block";
+}
+function selectRole(role) {
+    alert("You selected: " + role);
+    // Later we will open the dashboard here
+}
+
 
 translations.am.signupTitle = "መመዝገብ";
 translations.am.signupBtn = "መመዝገብ";
