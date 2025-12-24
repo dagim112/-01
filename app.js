@@ -106,6 +106,7 @@ function createAccount() {
 
     alert("Account created successfully!");
     showLogin();
+}
 
 
 
