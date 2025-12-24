@@ -63,16 +63,30 @@
 </div>
 <!-- ADMIN DASHBOARD -->
 <div id="admin-screen" class="screen">
-    <h1 class="app-title">Admin Dashboard</h1>
 
-    <div class="dashboard-grid">
-        <button class="dash-btn" onclick="openPage('products')">📦 Products</button>
-        <button class="dash-btn" onclick="openPage('inbound')">⬆️ Inbound</button>
-        <button class="dash-btn" onclick="openPage('outbound')">⬇️ Outbound</button>
-        <button class="dash-btn" onclick="openPage('stock')">📊 Stock</button>
-        <button class="dash-btn" onclick="openPage('workers')">👥 Workers</button>
-        <button class="dash-btn" onclick="openPage('settings')">⚙️ Settings</button>
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div id="top-date">Tue. Apr 30</div>
+        <div id="top-lang">አፋን ኦሮሞ (Afaani Oromoo)</div>
     </div>
+
+    <!-- DAILY TOTAL -->
+    <h2 class="section-title">የእለት ለመለኪያ ቁጥር</h2>
+    <div class="big-number">22,450</div>
+
+    <!-- CHART PLACEHOLDER -->
+    <div class="chart-placeholder">📊 Pie Chart</div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="dashboard-grid">
+        <button class="dash-btn">📷 ሲካን ፎቶ</button>
+        <button class="dash-btn">🖨️ የሲካን አታ</button>
+        <button class="dash-btn green">➕ አን መጨመሪያ ቁጥር 350</button>
+        <button class="dash-btn orange">➖ አመ አነሳሽ ቁጥር 350</button>
+        <button class="dash-btn">⬇️ የላኪ መረጃ</button>
+        <button class="dash-btn">⬆️ የተላከ መረጃ</button>
+    </div>
+
 </div>
 
 
