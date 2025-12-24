@@ -19,6 +19,22 @@
             <button onclick="setLanguage('en')" class="lang-btn">English</button>
         </div>
     </div>
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="screen">
+        <h1 class="app-title" id="login-title"></h1>
+
+        <div class="input-group">
+            <input id="login-username" type="text" placeholder="">
+        </div>
+
+        <div class="input-group">
+            <input id="login-password" type="password" placeholder="">
+        </div>
+
+        <button class="main-btn" onclick="loginUser()" id="login-btn"></button>
+
+        <p class="switch-text" onclick="showSignup()" id="signup-link"></p>
+    </div>
 
     <script src="app.js"></script>
 </body>
