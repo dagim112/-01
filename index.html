@@ -96,54 +96,73 @@
     <div class="top-bar">
         <div class="menu-icon">☰</div>
         <div class="app-title">ጥቁሬ</div>
-        <div class="lang-selector">አፋሪ ኦሮሞ (Afaani Oromoo)</div>
+        <select id="lang-select" class="lang-selector" onchange="changeDashboardLanguage(this.value)">
+            <option value="am">Amharic (አማርኛ)</option>
+            <option value="om">Afaan Oromoo</option>
+            <option value="en">English</option>
+        </select>
     </div>
 
     <!-- DATE -->
-    <div class="date-bar">Tue. Apr 30</div>
+    <div class="date-bar" id="top-date">Tue. Apr 30</div>
 
-    <!-- PIE CHART + TOTAL -->
-    <h2 class="section-title">የእርምራ ለመመልከት ቁጥር</h2>
-    <div class="big-number">22,450</div>
-    <div class="chart-placeholder">📊 Pie Chart</div>
+    <!-- TITLE + TOTAL -->
+    <h2 class="section-title" id="admin-title">የእርምራ ለመመልከት ቁጥር</h2>
+    <div class="big-number" id="total-value">22,450</div>
 
-    <!-- BUY / SELL BUTTONS -->
+    <!-- PIE CHART -->
+    <div class="chart-container">
+        <canvas id="stockChart"></canvas>
+    </div>
+
+    <!-- BIG BUY / SELL BUTTONS -->
     <div class="action-row">
-        <button class="action-btn orange">ስ.ን (Sell)</button>
-        <button class="action-btn blue">ስን (Buy)</button>
+        <button class="action-btn orange" id="sell-btn">ስ.ን (Sell)</button>
+        <button class="action-btn blue" id="buy-btn">ስን (Buy)</button>
     </div>
 
     <!-- SCANNER + PRINTER -->
     <div class="icon-row">
         <div class="icon-box">
             <div class="icon">🔦</div>
-            <p class="icon-label">ስን ፈቃድ</p>
+            <p class="icon-label" id="scanner-label">ስን ፈቃድ</p>
         </div>
         <div class="icon-box">
             <div class="icon">🖨️</div>
-            <p class="icon-label">የእርምራ ማሳያ</p>
+            <p class="icon-label" id="printer-label">የእርምራ ማሳያ</p>
         </div>
     </div>
 
     <!-- ADD / SUBTRACT -->
     <div class="action-row">
-        <button class="action-btn green">➕ አን መጨመሪያ ቁጥር: 350</button>
-        <button class="action-btn orange">➖ አመ አውልቃል: 350</button>
+        <button class="action-btn green" id="add-btn">➕ አን መጨመሪያ ቁጥር: 350</button>
+        <button class="action-btn orange" id="remove-btn">➖ አመ አውልቃል: 350</button>
     </div>
 
     <!-- DOWNLOAD / EXPORT -->
     <div class="icon-row">
         <div class="icon-box">
             <div class="icon">⬇️</div>
-            <p class="icon-label">የላኪ መረጃ</p>
+            <p class="icon-label" id="download-label">የላኪ መረጃ</p>
         </div>
         <div class="icon-box">
             <div class="icon">➡️</div>
-            <p class="icon-label">የተላከ መረጃ</p>
+            <p class="icon-label" id="export-label">የተላከ መረጃ</p>
         </div>
     </div>
 
+    <!-- SIMPLE EDIT FORM FOR STOCK DATA -->
+    <div class="edit-panel">
+        <h3>Edit stock data</h3>
+        <label>Electronics: <input type="number" id="stock-electronics" value="8500"></label>
+        <label>Clothing: <input type="number" id="stock-clothing" value="6200"></label>
+        <label>Food: <input type="number" id="stock-food" value="4300"></label>
+        <label>Furniture: <input type="number" id="stock-furniture" value="3450"></label>
+        <button onclick="updateStockChart()">Update chart</button>
+    </div>
+
 </div>
+
 
 
 <!-- WORKER DASHBOARD -->
