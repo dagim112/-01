@@ -64,8 +64,17 @@
 <!-- ADMIN DASHBOARD -->
 <div id="admin-screen" class="screen">
     <h1 class="app-title">Admin Dashboard</h1>
-    <p>Welcome, Admin!</p>
+
+    <div class="dashboard-grid">
+        <button class="dash-btn" onclick="openPage('products')">📦 Products</button>
+        <button class="dash-btn" onclick="openPage('inbound')">⬆️ Inbound</button>
+        <button class="dash-btn" onclick="openPage('outbound')">⬇️ Outbound</button>
+        <button class="dash-btn" onclick="openPage('stock')">📊 Stock</button>
+        <button class="dash-btn" onclick="openPage('workers')">👥 Workers</button>
+        <button class="dash-btn" onclick="openPage('settings')">⚙️ Settings</button>
+    </div>
 </div>
+
 
 <!-- WORKER DASHBOARD -->
 <div id="worker-screen" class="screen">
