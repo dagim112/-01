@@ -1,15 +1,73 @@
+// ---------- app.js (edited) ----------
+
 // ---------- Simple persistence keys ----------
-const ADMIN_KEY = "tikure_admin";        // stores {user, pass}
-const EMPLOYEES_KEY = "tikure_employees"; // stores array of {user, pass}
+const ADMIN_KEY = "tikure_admin";         // stores {user, pass}
+const EMPLOYEES_KEY = "tikure_employees";// stores array of {user, pass}
 const STOCK_KEY = "tikure_stock";        // stores stock numbers
 const LANG_KEY = "appLanguage";
 
-// ---------- Utility ----------
+// ---------- Small DOM helper ----------
 function $(id){ return document.getElementById(id); }
-function showScreen(id){
+
+// ---------- Navigation history stack & helpers ----------
+const navStack = [];
+
+// helper to get currently visible screen id (or null)
+function getCurrentScreenId() {
+    const visible = Array.from(document.querySelectorAll(".screen")).find(s => s.style.display !== "none");
+    return visible ? visible.id : null;
+}
+
+// showScreen: hides all screens and shows the requested one
+// it also maintains a simple history stack for the Back button
+function showScreen(id, options = { replace: false }) {
+    const current = getCurrentScreenId();
+
+    // if we are navigating to the same screen, do nothing (but update back button)
+    if (current === id) {
+        updateBackButtonVisibility(id);
+        return;
+    }
+
+    // push current to stack unless replace is true or there is no current
+    if (current && !options.replace) {
+        navStack.push(current);
+    }
+
+    // hide all and show target
     document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
     const el = $(id);
     if (el) el.style.display = "block";
+
+    // update back button visibility
+    updateBackButtonVisibility(id);
+}
+
+// goBack: pop the last screen from stack and show it
+function goBack() {
+    if (navStack.length === 0) {
+        // nothing in history — fallback to role selection
+        const current = getCurrentScreenId();
+        if (current === "language-screen") return;
+        showScreen("role-screen", { replace: true });
+        navStack.length = 0;
+        return;
+    }
+
+    const prev = navStack.pop();
+    // show previous screen without pushing current into stack
+    showScreen(prev, { replace: true });
+}
+
+// helper to show/hide back button (hide on language-screen)
+function updateBackButtonVisibility(currentScreenId) {
+    const back = $("back-btn");
+    if (!back) return;
+    if (!currentScreenId || currentScreenId === "language-screen") {
+        back.style.display = "none";
+    } else {
+        back.style.display = "inline-block";
+    }
 }
 
 // ---------- Language + initial flow ----------
@@ -22,7 +80,7 @@ function setLanguage(lang){
 function chooseAdmin(){
     const admin = JSON.parse(localStorage.getItem(ADMIN_KEY) || "null");
     if (!admin) {
-        // no admin yet -> show admin setup
+        // no admin yet -> show admin setup (replace so language isn't pushed)
         showScreen("admin-setup-screen");
     } else {
         // show admin login
@@ -93,7 +151,6 @@ function openAdminAfterLogin(){
 
 function openWorkerAfterLogin(username){
     showScreen("worker-screen");
-    // worker-specific init
     const lang = localStorage.getItem(LANG_KEY) || "am";
     changeWorkerLanguage(lang);
     // optionally show worker name somewhere
@@ -124,7 +181,9 @@ function openWorkerFromMenu(){
 
 function logout(){
     closeMenu();
-    showScreen("role-screen");
+    // clear navigation stack and go to role selection
+    navStack.length = 0;
+    showScreen("role-screen", { replace: true });
 }
 
 // ---------- Admin can create employees ----------
@@ -267,12 +326,14 @@ function getSavedStock(){
 
 function initStockChart(){
     const stock = getSavedStock();
-    $("stock-electronics").value = stock.electronics;
-    $("stock-clothing").value = stock.clothing;
-    $("stock-food").value = stock.food;
-    $("stock-furniture").value = stock.furniture;
+    if ($("stock-electronics")) $("stock-electronics").value = stock.electronics;
+    if ($("stock-clothing")) $("stock-clothing").value = stock.clothing;
+    if ($("stock-food")) $("stock-food").value = stock.food;
+    if ($("stock-furniture")) $("stock-furniture").value = stock.furniture;
 
-    const ctx = $("stockChart").getContext("2d");
+    const canvas = $("stockChart");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
     const data = {
         labels: ["Electronics","Clothing","Food","Furniture"],
         datasets: [{
@@ -314,15 +375,14 @@ function updateStockChart(){
 function updateTotalValue(){
     const stock = getSavedStock();
     const total = stock.electronics + stock.clothing + stock.food + stock.furniture;
-    $("total-value").innerText = total.toLocaleString();
+    if ($("total-value")) $("total-value").innerText = total.toLocaleString();
 }
 
 // ---------- Initialization on load ----------
 window.addEventListener("load", () => {
     // show language screen by default
-    showScreen("language-screen");
+    showScreen("language-screen", { replace: true });
 
-    // ensure logo exists (user should replace logo.png)
     // sync language selects
     const lang = localStorage.getItem(LANG_KEY) || "am";
     const sel = $("lang-select");
@@ -331,4 +391,8 @@ window.addEventListener("load", () => {
     if (menuSel) menuSel.value = lang;
     const workerSel = $("worker-lang-select");
     if (workerSel) workerSel.value = lang;
+
+    // ensure back button visibility is correct
+    updateBackButtonVisibility(getCurrentScreenId());
 });
+
