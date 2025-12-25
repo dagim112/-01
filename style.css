@@ -7,6 +7,33 @@ body {
     color: white;
     text-align: center;
 }
+/* GLOBAL BACK BUTTON */
+.back-btn {
+    position: fixed;
+    top: 78px;               /* below the logo */
+    left: 16px;              /* easy thumb reach on tablets */
+    z-index: 3100;
+    background: #1f1f1f;
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    box-shadow: 0 4px 0 #000;
+    cursor: pointer;
+    display: none;           /* hidden on first screen */
+}
+
+.back-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #000;
+}
+
+/* smaller screens: move slightly right so it doesn't overlap menu icon */
+@media (max-width: 600px) {
+    .back-btn { left: 12px; top: 72px; font-size: 15px; padding: 9px 12px; }
+}
+
 
 /* GLOBAL HEADER (logo always visible) */
 #global-header {
