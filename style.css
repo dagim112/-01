@@ -7,12 +7,63 @@ body {
     color: white;
     text-align: center;
 }
+
+/* GLOBAL HEADER (logo centered, back left, language + logout right) */
+#global-header {
+    position: fixed;
+    top: 8px;
+    left: 0;
+    right: 0;
+    height: 120px;                 /* room for larger logo */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    z-index: 3000;
+    pointer-events: none;          /* allow children to opt-in with pointer-events:auto */
+    gap: 12px;
+}
+
+/* header regions */
+.header-left,
+.header-center,
+.header-right {
+    display: flex;
+    align-items: center;
+    pointer-events: auto;          /* enable interaction for children */
+}
+
+/* left area (back button) */
+.header-left {
+    flex: 0 0 auto;
+    min-width: 56px;
+    justify-content: flex-start;
+}
+
+/* center area (logo) */
+.header-center {
+    flex: 1 1 auto;
+    justify-content: center;
+}
+
+/* right area (language + logout) */
+.header-right {
+    flex: 0 0 auto;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* logo */
+#app-logo {
+    height: 110px;
+    pointer-events: auto;
+    border-radius: 30px;
+    display: block;
+    margin: 0 auto;
+}
+
 /* GLOBAL BACK BUTTON */
 .back-btn {
-    position: fixed;
-    top: 78px;               /* below the logo */
-    left: 16px;              /* easy thumb reach on tablets */
-    z-index: 3100;
     background: #1f1f1f;
     color: #fff;
     border: none;
@@ -21,44 +72,45 @@ body {
     font-size: 16px;
     box-shadow: 0 4px 0 #000;
     cursor: pointer;
-    display: none;           /* hidden on first screen */
+    display: none;           /* shown/hidden by JS */
 }
 
+/* small active press */
 .back-btn:active {
     transform: translateY(4px);
     box-shadow: 0 0 0 #000;
 }
 
-/* smaller screens: move slightly right so it doesn't overlap menu icon */
-@media (max-width: 600px) {
-    .back-btn { left: 12px; top: 72px; font-size: 15px; padding: 9px 12px; }
+/* language select in header */
+#global-lang-select,
+.lang-selector,
+.menu-lang {
+    font-size: 14px;
+    color: #ccc;
+    background: #1f1f1f;
+    border: 1px solid #333;
+    padding: 8px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
 }
 
-
-/* GLOBAL HEADER (logo always visible) */
-#global-header {
-    position: fixed;
-    top: 8px;
-    left: 0;
-    right: 0;
-    height: 64px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 3000;
-    pointer-events: none;
-}
-
-#app-logo {
-    height: 110px;
-    pointer-events: auto;
-    border-radius: 30px;
+/* top logout button */
+.top-logout {
+    background: #660000;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #000;
 }
 
 /* Screens */
 .screen {
     display: none;
-    padding-top: 110px; /* leave space for logo */
+    padding-top: 140px; /* leave space for header/logo */
     min-height: 100vh;
 }
 
@@ -170,11 +222,6 @@ body {
     cursor: pointer;
 }
 
-.lang-selector {
-    font-size: 14px;
-    color: #ccc;
-}
-
 /* DATE BAR */
 .date-bar {
     text-align: center;
@@ -197,20 +244,6 @@ body {
     margin: 8px 0 20px;
     color: #00ffcc;
     text-align: center;
-}
-
-/* CHART */
-.chart-container {
-    background: #2a2a2a;
-    border-radius: 12px;
-    padding: 16px;
-    margin: 12px auto;
-    width: 80%;
-}
-
-.chart-container canvas {
-    width: 100% !important;
-    height: 220px !important;
 }
 
 /* BUTTON ROWS */
@@ -402,13 +435,23 @@ body {
 }
 
 /* Responsive */
+@media (max-width: 900px) {
+    #global-header { height: 96px; padding: 6px 10px; }
+    #app-logo { height: 80px; border-radius: 18px; }
+    .screen { padding-top: 110px; }
+}
+
 @media (max-width: 600px) {
     .language-buttons, .edit-panel, .chart-container, .dashboard-grid {
         width: 92%;
     }
     .app-title { font-size: 28px; }
     #app-logo { height: 48px; }
+    .header-right { gap: 6px; }
+    .top-logout { padding: 6px 8px; font-size: 13px; }
+    .back-btn { left: 10px; top: 72px; }
 }
+
 
 
 
