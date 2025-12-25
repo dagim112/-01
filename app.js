@@ -1,124 +1,153 @@
-// ---------- app.js (updated for your HTML/CSS) ----------
+// ---------- app.js (edited) ----------
 
-// Persistence keys
-const ADMIN_KEY = "tikure_admin";
-const EMPLOYEES_KEY = "tikure_employees";
-const STOCK_KEY = "tikure_stock";
+// ---------- Simple persistence keys ----------
+const ADMIN_KEY = "tikure_admin";         // stores {user, pass}
+const EMPLOYEES_KEY = "tikure_employees";// stores array of {user, pass}
+const STOCK_KEY = "tikure_stock";        // stores stock numbers
 const LANG_KEY = "appLanguage";
 
-// Short DOM helper
-function $(id) { return document.getElementById(id); }
+// ---------- Small DOM helper ----------
+function $(id){ return document.getElementById(id); }
 
-// Navigation history stack
+// ---------- Navigation history stack & helpers ----------
 const navStack = [];
 
-// Get current visible screen id
+// helper to get currently visible screen id (or null)
 function getCurrentScreenId() {
     const visible = Array.from(document.querySelectorAll(".screen")).find(s => s.style.display !== "none");
     return visible ? visible.id : null;
 }
 
-// Show a screen and manage history
+// showScreen: hides all screens and shows the requested one
+// it also maintains a simple history stack for the Back button
 function showScreen(id, options = { replace: false }) {
     const current = getCurrentScreenId();
 
+    // if we are navigating to the same screen, do nothing (but update back button)
     if (current === id) {
         updateBackButtonVisibility(id);
         return;
     }
 
+    // push current to stack unless replace is true or there is no current
     if (current && !options.replace) {
         navStack.push(current);
     }
 
+    // hide all and show target
     document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
     const el = $(id);
     if (el) el.style.display = "block";
 
+    // update back button visibility and header controls
     updateBackButtonVisibility(id);
 }
 
-// Back navigation
+// goBack: pop the last screen from stack and show it
 function goBack() {
     if (navStack.length === 0) {
+        // nothing in history — fallback to role selection
         const current = getCurrentScreenId();
         if (current === "language-screen") return;
         showScreen("role-screen", { replace: true });
         navStack.length = 0;
         return;
     }
+
     const prev = navStack.pop();
+    // show previous screen without pushing current into stack
     showScreen(prev, { replace: true });
 }
 
-// Show/hide back button (hidden on language screen)
+// ---------- UPDATED: show/hide back button and header controls ----------
+// Back button: visible from the second screen (role-screen) onward.
+// Header language select and logout: visible only on the main/admin page (admin-screen).
 function updateBackButtonVisibility(currentScreenId) {
     const back = $("back-btn");
-    if (!back) return;
-    if (!currentScreenId || currentScreenId === "language-screen") {
-        back.style.display = "none";
-    } else {
-        back.style.display = "inline-block";
+    const langSelect = $("global-lang-select");
+    const topLogout = $("top-logout");
+
+    // Back button: hidden only on the first language screen
+    if (back) {
+        if (!currentScreenId || currentScreenId === "language-screen") {
+            back.style.display = "none";
+        } else {
+            back.style.display = "inline-block";
+        }
+    }
+
+    // Language menu and Logout: show only on the admin screen
+    const showOnScreens = ["admin-screen"]; // extend this array if you want more screens to show these controls
+    const shouldShowHeaderControls = showOnScreens.includes(currentScreenId);
+
+    if (langSelect) {
+        langSelect.style.display = shouldShowHeaderControls ? "inline-block" : "none";
+    }
+    if (topLogout) {
+        topLogout.style.display = shouldShowHeaderControls ? "inline-block" : "none";
     }
 }
 
-// Set language from language chooser (first screen)
-function setLanguage(lang) {
+// ---------- Language + initial flow ----------
+function setLanguage(lang){
     localStorage.setItem(LANG_KEY, lang);
-    // After choosing language, go to role selection
+    // After language selection, go to role selection
     showScreen("role-screen");
-    syncLanguageSelects(lang);
 }
 
-// Role selection
-function chooseAdmin() {
+function chooseAdmin(){
     const admin = JSON.parse(localStorage.getItem(ADMIN_KEY) || "null");
     if (!admin) {
+        // no admin yet -> show admin setup (replace so language isn't pushed)
         showScreen("admin-setup-screen");
     } else {
+        // show admin login
         prepareLogin("admin");
     }
 }
 
-function chooseWorker() {
+function chooseWorker(){
+    // show worker login
     prepareLogin("worker");
 }
 
-// Create initial admin (first run)
-function createInitialAdmin() {
-    const user = ($("setup-admin-username") || {}).value || "";
-    const pass = ($("setup-admin-password") || {}).value || "";
-    if (!user.trim() || !pass.trim()) { alert("Please enter username and password"); return; }
-    localStorage.setItem(ADMIN_KEY, JSON.stringify({ user: user.trim(), pass: pass.trim() }));
+// ---------- Admin setup (first run) ----------
+function createInitialAdmin(){
+    const user = $("setup-admin-username").value.trim();
+    const pass = $("setup-admin-password").value.trim();
+    if (!user || !pass) { alert("Please enter username and password"); return; }
+    localStorage.setItem(ADMIN_KEY, JSON.stringify({user, pass}));
     alert("Admin created. Please login.");
     prepareLogin("admin");
 }
 
-// Login flow
-let loginRole = null;
-function prepareLogin(role) {
+// ---------- Login flow ----------
+let loginRole = null; // "admin" or "worker"
+function prepareLogin(role){
     loginRole = role;
-    if ($("login-username")) $("login-username").value = "";
-    if ($("login-password")) $("login-password").value = "";
-    if ($("login-title")) $("login-title").innerText = role === "admin" ? "Admin Login" : "Worker Login";
-    if ($("login-hint")) $("login-hint").innerText = role === "admin" ? "" : "Enter your worker credentials";
+    $("login-username").value = "";
+    $("login-password").value = "";
+    $("login-title").innerText = role === "admin" ? "Admin Login" : "Worker Login";
+    $("login-hint").innerText = role === "admin" ? "" : "Enter your worker credentials";
     showScreen("login-screen");
 }
 
-function loginUser() {
-    const user = ($("login-username") || {}).value || "";
-    const pass = ($("login-password") || {}).value || "";
-    if (!user.trim() || !pass.trim()) { alert("Please fill all fields"); return; }
+function loginUser(){
+    const user = $("login-username").value.trim();
+    const pass = $("login-password").value.trim();
+    if (!user || !pass) { alert("Please fill all fields"); return; }
 
     if (loginRole === "admin") {
         const admin = JSON.parse(localStorage.getItem(ADMIN_KEY) || "null");
         if (!admin) { alert("No admin found. Create admin first."); showScreen("admin-setup-screen"); return; }
         if (admin.user === user && admin.pass === pass) {
+            // success
             openAdminAfterLogin();
         } else {
             alert("Invalid admin credentials");
         }
     } else {
+        // worker login
         const employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
         const found = employees.find(e => e.user === user && e.pass === pass);
         if (found) {
@@ -129,74 +158,69 @@ function loginUser() {
     }
 }
 
-// After login
-function openAdminAfterLogin() {
+// ---------- After login navigation ----------
+function openAdminAfterLogin(){
     showScreen("admin-screen");
     const lang = localStorage.getItem(LANG_KEY) || "am";
     changeDashboardLanguage(lang);
-    initStockIfNeeded();
-    renderEmployeeList(); // update any admin-side list if present
+    initStockChart();
+    renderEmployeeList();
 }
 
-function openWorkerAfterLogin(username) {
+function openWorkerAfterLogin(username){
     showScreen("worker-screen");
     const lang = localStorage.getItem(LANG_KEY) || "am";
     changeWorkerLanguage(lang);
     // optionally show worker name somewhere
 }
 
-// Menu open/close
-function openMenu() {
-    const menu = $("side-menu");
-    const overlay = $("menu-overlay");
-    if (menu) menu.classList.add("open");
-    if (overlay) overlay.classList.add("show");
-}
-function closeMenu() {
-    const menu = $("side-menu");
-    const overlay = $("menu-overlay");
-    if (menu) menu.classList.remove("open");
-    if (overlay) overlay.classList.remove("show");
+// ---------- Menu functions ----------
+function openMenu(){
+    $("side-menu").classList.add("open");
+    $("menu-overlay").classList.add("show");
 }
 
-function openAdminFromMenu() {
+function closeMenu(){
+    $("side-menu").classList.remove("open");
+    $("menu-overlay").classList.remove("show");
+}
+
+function openAdminFromMenu(){
     closeMenu();
     showScreen("admin-screen");
-    initStockIfNeeded();
+    initStockChart();
     renderEmployeeList();
 }
-function openWorkerFromMenu() {
+
+function openWorkerFromMenu(){
     closeMenu();
     showScreen("worker-screen");
 }
 
-// Logout
-function logout() {
+function logout(){
     closeMenu();
+    // clear navigation stack and go to role selection
     navStack.length = 0;
     showScreen("role-screen", { replace: true });
 }
 
-// ---------- Employees (create/list/remove) ----------
-function createEmployee() {
-    const userEl = $("new-emp-username");
-    const passEl = $("new-emp-password");
-    const user = userEl ? userEl.value.trim() : "";
-    const pass = passEl ? passEl.value.trim() : "";
+// ---------- Admin can create employees ----------
+function createEmployee(){
+    const user = $("new-emp-username").value.trim();
+    const pass = $("new-emp-password").value.trim();
     if (!user || !pass) { alert("Enter username and password"); return; }
 
     let employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
     if (employees.find(e => e.user === user)) { alert("Employee username already exists"); return; }
 
-    employees.push({ user, pass });
+    employees.push({user, pass});
     localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
-    if (userEl) userEl.value = "";
-    if (passEl) passEl.value = "";
+    $("new-emp-username").value = "";
+    $("new-emp-password").value = "";
     renderEmployeeList();
-    renderEmployeeListInModal();
 }
 
-function renderEmployeeList() {
+function renderEmployeeList(){
     const employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
     const container = $("employee-list");
     if (!container) return;
@@ -214,97 +238,16 @@ function renderEmployeeList() {
     });
 }
 
-function removeEmployee(index) {
+function removeEmployee(index){
     let employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
     if (!employees[index]) return;
     if (!confirm(`Remove employee ${employees[index].user}?`)) return;
-    employees.splice(index, 1);
+    employees.splice(index,1);
     localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
     renderEmployeeList();
-    renderEmployeeListInModal();
 }
 
-// ---------- Employee modal helpers (if you use modal) ----------
-function openEmployeePanel() {
-    // If modal exists, open it; otherwise scroll to admin panel
-    const modal = $("employee-modal");
-    if (modal) {
-        modal.setAttribute("aria-hidden", "false");
-        renderEmployeeListInModal();
-        // push current screen so Back works
-        const current = getCurrentScreenId();
-        if (current && navStack[navStack.length - 1] !== current) navStack.push(current);
-        return;
-    }
-    // fallback: scroll to admin employee panel if present
-    const panel = $("employee-panel");
-    if (panel) {
-        showScreen("admin-screen");
-        panel.scrollIntoView({ behavior: "smooth", block: "center" });
-        panel.style.boxShadow = "0 0 0 3px rgba(0,150,255,0.08)";
-        setTimeout(() => panel.style.boxShadow = "", 1200);
-    } else {
-        alert("Employee panel not found.");
-    }
-}
-
-function closeEmployeePanel() {
-    const modal = $("employee-modal");
-    if (modal) {
-        modal.setAttribute("aria-hidden", "true");
-        showScreen("admin-screen", { replace: true });
-    } else {
-        showScreen("admin-screen", { replace: true });
-    }
-}
-
-function createEmployeeFromModal() {
-    const user = ($("modal-emp-username") || {}).value || "";
-    const pass = ($("modal-emp-password") || {}).value || "";
-    if (!user.trim() || !pass.trim()) { alert("Enter username and password"); return; }
-
-    let employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
-    if (employees.find(e => e.user === user.trim())) { alert("Employee username already exists"); return; }
-
-    employees.push({ user: user.trim(), pass: pass.trim() });
-    localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
-    if ($("modal-emp-username")) $("modal-emp-username").value = "";
-    if ($("modal-emp-password")) $("modal-emp-password").value = "";
-    renderEmployeeListInModal();
-    renderEmployeeList();
-}
-
-function renderEmployeeListInModal() {
-    const container = $("modal-employee-list");
-    if (!container) return renderEmployeeList();
-    const employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
-    if (!employees || employees.length === 0) {
-        container.innerHTML = "<em>No employees yet</em>";
-        return;
-    }
-    container.innerHTML = "";
-    employees.forEach((e, i) => {
-        const row = document.createElement("div");
-        row.className = "emp-row";
-        const left = document.createElement("div");
-        left.textContent = e.user;
-        const right = document.createElement("div");
-        const btn = document.createElement("button");
-        btn.className = "emp-remove";
-        btn.textContent = "Remove";
-        btn.onclick = () => {
-            if (!confirm(`Remove employee ${e.user}?`)) return;
-            removeEmployee(i);
-            renderEmployeeListInModal();
-        };
-        right.appendChild(btn);
-        row.appendChild(left);
-        row.appendChild(right);
-        container.appendChild(row);
-    });
-}
-
-// ---------- Translations / language sync ----------
+// ---------- Dashboard translations ----------
 const dashboardTranslations = {
     am: {
         adminTitle: "የእርምራ ለመመልከት ቁጥር",
@@ -317,8 +260,7 @@ const dashboardTranslations = {
         download: "ውሂብ አውርድ",
         export: "ውሂብ ላክ",
         date: "Tue. Apr 30",
-        appTitle: "ጥቁሬ",
-        employeesTitle: "ሠራተኞች"
+        appTitle: "ጥቁሬ"
     },
     om: {
         adminTitle: "Lakkoofsa Qabeenyaa Guyyaa",
@@ -331,8 +273,7 @@ const dashboardTranslations = {
         download: "Odeeffannoo buusi",
         export: "Odeeffannoo ergi",
         date: "Tal. Ebla 30",
-        appTitle: "ጥቁሬ",
-        employeesTitle: "Hojjettoota"
+        appTitle: "ጥቁሬ"
     },
     en: {
         adminTitle: "Daily stock value",
@@ -345,33 +286,33 @@ const dashboardTranslations = {
         download: "Download data",
         export: "Export data",
         date: "Tue. Apr 30",
-        appTitle: "Tikure",
-        employeesTitle: "Employees"
+        appTitle: "Tikure"
     }
 };
-
-function changeDashboardLanguage(lang) {
+function changeDashboardLanguage(lang){
     localStorage.setItem(LANG_KEY, lang);
-    const t = dashboardTranslations[lang] || dashboardTranslations["am"];
+    const t = dashboardTranslations[lang];
 
+    if ($("admin-app-title")) $("admin-app-title").innerText = t.appTitle;
     if ($("admin-title")) $("admin-title").innerText = t.adminTitle;
     if ($("sell-btn")) $("sell-btn").innerText = t.sell;
     if ($("buy-btn")) $("buy-btn").innerText = t.buy;
     if ($("scanner-label")) $("scanner-label").innerText = t.scanner;
     if ($("printer-label")) $("printer-label").innerText = t.printer;
-    if ($("add-btn")) $("add-btn").innerText = t.add + ": 350";
-    if ($("remove-btn")) $("remove-btn").innerText = t.remove + ": 350";
+    if ($("add-btn")) $("add-btn").innerText = t.add;
+    if ($("remove-btn")) $("remove-btn").innerText = t.remove;
     if ($("download-label")) $("download-label").innerText = t.download;
     if ($("export-label")) $("export-label").innerText = t.export;
     if ($("top-date")) $("top-date").innerText = t.date;
 
-    // sync selects
+    // Also sync the dropdowns
     syncLanguageSelects(lang);
 }
 
-function changeWorkerLanguage(lang) {
+// Worker translations (simple reuse)
+function changeWorkerLanguage(lang){
     localStorage.setItem(LANG_KEY, lang);
-    const t = dashboardTranslations[lang] || dashboardTranslations["am"];
+    const t = dashboardTranslations[lang];
     if ($("worker-app-title")) $("worker-app-title").innerText = t.appTitle + " - Worker";
     if ($("worker-title")) $("worker-title").innerText = t.adminTitle;
     if ($("worker-scan-label")) $("worker-scan-label").innerText = t.scanner;
@@ -383,7 +324,7 @@ function changeWorkerLanguage(lang) {
     if (sel) sel.value = lang;
 }
 
-// Sync all language selects to a value
+// Sync language selects
 function syncLanguageSelects(lang) {
     const ids = ["global-lang-select", "menu-lang", "lang-select", "worker-lang-select"];
     ids.forEach(id => {
@@ -392,19 +333,9 @@ function syncLanguageSelects(lang) {
     });
 }
 
-// ---------- Stock (no required chart) ----------
-function getSavedStock() {
-    const s = JSON.parse(localStorage.getItem(STOCK_KEY) || "null");
-    if (s) return s;
-    const defaultStock = { electronics: 8500, clothing: 6200, food: 4300, furniture: 3450 };
-    localStorage.setItem(STOCK_KEY, JSON.stringify(defaultStock));
-    return defaultStock;
-}
+let stockChart;
 
-let stockChart = null;
-
-function initStockIfNeeded() {
-    // If a canvas exists, try to init Chart.js; otherwise just populate inputs and totals
+function initStockChart() {
     const stock = getSavedStock();
     if ($("stock-electronics")) $("stock-electronics").value = stock.electronics;
     if ($("stock-clothing")) $("stock-clothing").value = stock.clothing;
@@ -417,44 +348,54 @@ function initStockIfNeeded() {
         return;
     }
 
-    // If Chart.js is available and canvas exists, render pie chart
-    try {
-        const ctx = canvas.getContext("2d");
-        const data = {
-            labels: ["Electronics", "Clothing", "Food", "Furniture"],
-            datasets: [{
-                data: [stock.electronics, stock.clothing, stock.food, stock.furniture],
-                backgroundColor: ["#ff9800", "#4caf50", "#2196f3", "#9c27b0"]
-            }]
-        };
-        if (stockChart) stockChart.destroy();
-        if (typeof Chart !== "undefined") {
-            stockChart = new Chart(ctx, {
-                type: "pie",
-                data,
-                options: {
-                    plugins: {
-                        legend: { labels: { color: "#ffffff" } },
-                        tooltip: { enabled: true }
+    const ctx = canvas.getContext("2d");
+
+    const data = {
+        labels: ["Electronics", "Clothing", "Food", "Furniture"],
+        datasets: [{
+            data: [stock.electronics, stock.clothing, stock.food, stock.furniture],
+            backgroundColor: ["#ff9800", "#4caf50", "#2196f3", "#9c27b0"]
+        }]
+    };
+
+    if (stockChart) {
+        stockChart.destroy();
+    }
+
+    if (typeof Chart !== "undefined") {
+        stockChart = new Chart(ctx, {
+            type: "pie",
+            data: data,
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: "#ffffff"
+                        }
                     }
                 }
-            });
-        }
-    } catch (err) {
-        // Chart failed — ignore and continue
-        console.warn("Chart init skipped:", err);
+            }
+        });
     }
 
     updateTotalValue();
 }
 
-function updateStockChart() {
-    const e = Number(($("stock-electronics") || {}).value || 0);
-    const c = Number(($("stock-clothing") || {}).value || 0);
-    const f = Number(($("stock-food") || {}).value || 0);
-    const fu = Number(($("stock-furniture") || {}).value || 0);
+function getSavedStock(){
+    const s = JSON.parse(localStorage.getItem(STOCK_KEY) || "null");
+    if (s) return s;
+    const defaultStock = {electronics:8500, clothing:6200, food:4300, furniture:3450};
+    localStorage.setItem(STOCK_KEY, JSON.stringify(defaultStock));
+    return defaultStock;
+}
 
-    const stock = { electronics: e, clothing: c, food: f, furniture: fu };
+function updateStockChart() {
+    const e = Number($("stock-electronics").value || 0);
+    const c = Number($("stock-clothing").value || 0);
+    const f = Number($("stock-food").value || 0);
+    const fu = Number($("stock-furniture").value || 0);
+
+    const stock = {electronics:e, clothing:c, food:f, furniture:fu};
     localStorage.setItem(STOCK_KEY, JSON.stringify(stock));
 
     if (stockChart && stockChart.data && stockChart.data.datasets && stockChart.data.datasets[0]) {
@@ -465,26 +406,18 @@ function updateStockChart() {
     updateTotalValue();
 }
 
-function updateTotalValue() {
+function updateTotalValue(){
     const stock = getSavedStock();
-    const total = (stock.electronics || 0) + (stock.clothing || 0) + (stock.food || 0) + (stock.furniture || 0);
+    const total = stock.electronics + stock.clothing + stock.food + stock.furniture;
     if ($("total-value")) $("total-value").innerText = total.toLocaleString();
 }
 
-// Delete stock data (reset)
-function deleteStockData() {
-    if (!confirm("Delete all saved stock data? This cannot be undone.")) return;
-    localStorage.removeItem(STOCK_KEY);
-    initStockIfNeeded();
-    alert("Stock data deleted and reset to defaults.");
-}
-
-// ---------- Init on load ----------
+// ---------- Initialization on load ----------
 window.addEventListener("load", () => {
     // show language screen by default
     showScreen("language-screen", { replace: true });
 
-    // sync language selects to saved language
+    // sync language selects
     const lang = localStorage.getItem(LANG_KEY) || "am";
     syncLanguageSelects(lang);
 
@@ -492,8 +425,9 @@ window.addEventListener("load", () => {
     const topLogout = $("top-logout");
     if (topLogout) topLogout.onclick = logout;
 
-    // ensure back button visibility
+    // ensure back button visibility is correct
     updateBackButtonVisibility(getCurrentScreenId());
 });
+
 
 
