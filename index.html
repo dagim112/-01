@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Tikure App</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
+    <!-- GLOBAL LOGO (always on top center) -->
+    <header id="global-header">
+        <img id="app-logo" src="logo.png" alt="App Logo">
+    </header>
 
     <!-- LANGUAGE SELECTION SCREEN -->
     <div id="language-screen" class="screen">
@@ -21,197 +26,202 @@
         </div>
     </div>
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="screen">
-        <h1 class="app-title" id="login-title"></h1>
-
-        <div class="input-group">
-            <input id="login-username" type="text" placeholder="">
-        </div>
-
-        <div class="input-group">
-            <input id="login-password" type="password" placeholder="">
-        </div>
-
-        <button class="main-btn" onclick="loginUser()" id="login-btn"></button>
-
-        <p class="switch-text" onclick="showSignup()" id="signup-link"></p>
-    </div>
-    <!-- SIGNUP SCREEN -->
-<div id="signup-screen" class="screen">
-    <h1 class="app-title" id="signup-title"></h1>
-
-    <div class="input-group">
-        <input id="signup-username" type="text" placeholder="">
-    </div>
-
-    <div class="input-group">
-        <input id="signup-password" type="password" placeholder="">
-    </div>
-
-    <button class="main-btn" onclick="createAccount()" id="signup-btn"></button>
-
-    <p class="switch-text" onclick="showLogin()" id="login-link"></p>
-</div>
     <!-- ROLE SELECTION SCREEN -->
-<div id="role-screen" class="screen">
-    <h1 class="app-title" id="role-title">ምረጥ መግቢያ</h1>
+    <div id="role-screen" class="screen">
+        <h1 class="app-title" id="role-title">ምረጥ መግቢያ</h1>
 
-    <div class="language-buttons">
-        <button class="lang-btn" onclick="selectRole('admin')" id="admin-btn">ባሉካ</button>
-        <button class="lang-btn" onclick="selectRole('worker')" id="worker-btn">ሠራተኛ</button>
-    </div>
-</div>
-<!-- ADMIN DASHBOARD -->
-<div id="admin-screen" class="screen">
-
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div id="top-date">Tue. Apr 30</div>
-        <div id="top-lang">አፋን ኦሮሞ (Afaani Oromoo)</div>
+        <div class="language-buttons">
+            <button class="lang-btn" onclick="chooseAdmin()" id="admin-btn">Admin</button>
+            <button class="lang-btn" onclick="chooseWorker()" id="worker-btn">Worker</button>
+        </div>
     </div>
 
-    <!-- DAILY TOTAL -->
-    <h2 class="section-title">የእለት ለመለኪያ ቁጥር</h2>
-    <div class="big-number">22,450</div>
+    <!-- ADMIN SETUP (first time only) -->
+    <div id="admin-setup-screen" class="screen">
+        <h1 class="app-title">Create Admin</h1>
 
-    <!-- CHART PLACEHOLDER -->
-    <div class="chart-placeholder">📊 Pie Chart</div>
+        <div class="input-group">
+            <input id="setup-admin-username" type="text" placeholder="Admin username">
+        </div>
 
-    <!-- ACTION BUTTONS -->
-    <div class="dashboard-grid">
-        <button class="dash-btn">📷 ሲካን ፎቶ</button>
-        <button class="dash-btn">🖨️ የሲካን አታ</button>
-        <button class="dash-btn green">➕ አን መጨመሪያ ቁጥር 350</button>
-        <button class="dash-btn orange">➖ አመ አነሳሽ ቁጥር 350</button>
-        <button class="dash-btn">⬇️ የላኪ መረጃ</button>
-        <button class="dash-btn">⬆️ የተላከ መረጃ</button>
+        <div class="input-group">
+            <input id="setup-admin-password" type="password" placeholder="Admin password">
+        </div>
+
+        <button class="main-btn" onclick="createInitialAdmin()">Create Admin</button>
     </div>
 
-</div>
-<!-- ADMIN DASHBOARD -->
-<div id="admin-screen" class="screen">
+    <!-- LOGIN SCREEN (used for Admin and Worker) -->
+    <div id="login-screen" class="screen">
+        <h1 class="app-title" id="login-title">Login</h1>
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="menu-icon">☰</div>
-        <div class="app-title">ጥቁሬ</div>
-        <select id="lang-select" class="lang-selector" onchange="changeDashboardLanguage(this.value)">
-            <option value="am">Amharic (አማርኛ)</option>
+        <div class="input-group">
+            <input id="login-username" type="text" placeholder="Username">
+        </div>
+
+        <div class="input-group">
+            <input id="login-password" type="password" placeholder="Password">
+        </div>
+
+        <button class="main-btn" onclick="loginUser()" id="login-btn">Login</button>
+
+        <p class="switch-text" id="login-hint"></p>
+    </div>
+
+    <!-- SIDE MENU -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">📋 Menu</div>
+
+        <button class="menu-item" onclick="openAdminFromMenu()">🏠 Admin Dashboard</button>
+        <button class="menu-item" onclick="openWorkerFromMenu()">👷 Worker Dashboard</button>
+
+        <div class="menu-divider"></div>
+
+        <div class="menu-label">🌐 Language</div>
+        <select id="menu-lang" class="menu-lang" onchange="changeDashboardLanguage(this.value)">
+            <option value="am">አማርኛ</option>
             <option value="om">Afaan Oromoo</option>
             <option value="en">English</option>
         </select>
+
+        <div class="menu-divider"></div>
+
+        <button class="menu-item logout" onclick="logout()">🚪 Logout</button>
     </div>
 
-    <!-- DATE -->
-    <div class="date-bar" id="top-date">Tue. Apr 30</div>
+    <div id="menu-overlay" class="menu-overlay" onclick="closeMenu()"></div>
 
-    <!-- TITLE + TOTAL -->
-    <h2 class="section-title" id="admin-title">የእርምራ ለመመልከት ቁጥር</h2>
-    <div class="big-number" id="total-value">22,450</div>
+    <!-- ADMIN DASHBOARD -->
+    <div id="admin-screen" class="screen">
 
-    <!-- PIE CHART -->
-    <div class="chart-container">
-        <canvas id="stockChart"></canvas>
-    </div>
-
-    <!-- BIG BUY / SELL BUTTONS -->
-    <div class="action-row">
-        <button class="action-btn orange" id="sell-btn">ስ.ን (Sell)</button>
-        <button class="action-btn blue" id="buy-btn">ስን (Buy)</button>
-    </div>
-
-    <!-- SCANNER + PRINTER -->
-    <div class="icon-row">
-        <div class="icon-box">
-            <div class="icon">🔦</div>
-            <p class="icon-label" id="scanner-label">ስን ፈቃድ</p>
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="menu-icon" onclick="openMenu()">☰</div>
+            <div class="app-title" id="admin-app-title">ጥቁሬ</div>
+            <select id="lang-select" class="lang-selector" onchange="changeDashboardLanguage(this.value)">
+                <option value="am">Amharic (አማርኛ)</option>
+                <option value="om">Afaan Oromoo</option>
+                <option value="en">English</option>
+            </select>
         </div>
-        <div class="icon-box">
-            <div class="icon">🖨️</div>
-            <p class="icon-label" id="printer-label">የእርምራ ማሳያ</p>
+
+        <!-- DATE -->
+        <div class="date-bar" id="top-date">Tue. Apr 30</div>
+
+        <!-- TITLE + TOTAL -->
+        <h2 class="section-title" id="admin-title">የእርምራ ለመመልከት ቁጥር</h2>
+        <div class="big-number" id="total-value">22,450</div>
+
+        <!-- PIE CHART -->
+        <div class="chart-container">
+            <canvas id="stockChart"></canvas>
         </div>
-    </div>
 
-    <!-- ADD / SUBTRACT -->
-    <div class="action-row">
-        <button class="action-btn green" id="add-btn">➕ አን መጨመሪያ ቁጥር: 350</button>
-        <button class="action-btn orange" id="remove-btn">➖ አመ አውልቃል: 350</button>
-    </div>
-
-    <!-- DOWNLOAD / EXPORT -->
-    <div class="icon-row">
-        <div class="icon-box">
-            <div class="icon">⬇️</div>
-            <p class="icon-label" id="download-label">የላኪ መረጃ</p>
+        <!-- BIG BUY / SELL BUTTONS -->
+        <div class="action-row">
+            <button class="action-btn orange" id="sell-btn">Sell</button>
+            <button class="action-btn blue" id="buy-btn">Buy</button>
         </div>
-        <div class="icon-box">
-            <div class="icon">➡️</div>
-            <p class="icon-label" id="export-label">የተላከ መረጃ</p>
+
+        <!-- SCANNER + PRINTER -->
+        <div class="icon-row">
+            <div class="icon-box">
+                <div class="icon">🔦</div>
+                <p class="icon-label" id="scanner-label">Scanner</p>
+            </div>
+            <div class="icon-box">
+                <div class="icon">🖨️</div>
+                <p class="icon-label" id="printer-label">Printer</p>
+            </div>
         </div>
-    </div>
 
-    <!-- SIMPLE EDIT FORM FOR STOCK DATA -->
-    <div class="edit-panel">
-        <h3>Edit stock data</h3>
-        <label>Electronics: <input type="number" id="stock-electronics" value="8500"></label>
-        <label>Clothing: <input type="number" id="stock-clothing" value="6200"></label>
-        <label>Food: <input type="number" id="stock-food" value="4300"></label>
-        <label>Furniture: <input type="number" id="stock-furniture" value="3450"></label>
-        <button onclick="updateStockChart()">Update chart</button>
-    </div>
-
-</div>
-
-
-
-<!-- WORKER DASHBOARD -->
-<div id="worker-screen" class="screen">
-
-    <div class="top-bar">
-        <div class="menu-icon">☰</div>
-        <div class="app-title">ጥቁሬ - Worker</div>
-        <div class="lang-selector">Role: Worker</div>
-    </div>
-
-    <div class="date-bar">Today’s tasks</div>
-
-    <h2 class="section-title">የዛሬ ሥራ ብዛት</h2>
-    <div class="big-number">120</div>
-
-    <div class="action-row">
-        <button class="action-btn blue">⬆️ Inbound items</button>
-        <button class="action-btn orange">⬇️ Outbound items</button>
-    </div>
-
-    <div class="icon-row">
-        <div class="icon-box">
-            <div class="icon">🔦</div>
-            <p class="icon-label">Scan item</p>
+        <!-- ADD / SUBTRACT -->
+        <div class="action-row">
+            <button class="action-btn green" id="add-btn">➕ Add: 350</button>
+            <button class="action-btn orange" id="remove-btn">➖ Remove: 350</button>
         </div>
-        <div class="icon-box">
-            <div class="icon">🖨️</div>
-            <p class="icon-label">Print label</p>
+
+        <!-- DOWNLOAD / EXPORT -->
+        <div class="icon-row">
+            <div class="icon-box">
+                <div class="icon">⬇️</div>
+                <p class="icon-label" id="download-label">Download</p>
+            </div>
+            <div class="icon-box">
+                <div class="icon">➡️</div>
+                <p class="icon-label" id="export-label">Export</p>
+            </div>
         </div>
+
+        <!-- SIMPLE EDIT FORM FOR STOCK DATA -->
+        <div class="edit-panel">
+            <h3>Edit stock data</h3>
+            <label>Electronics: <input type="number" id="stock-electronics" value="8500"></label>
+            <label>Clothing: <input type="number" id="stock-clothing" value="6200"></label>
+            <label>Food: <input type="number" id="stock-food" value="4300"></label>
+            <label>Furniture: <input type="number" id="stock-furniture" value="3450"></label>
+            <button onclick="updateStockChart()">Update chart</button>
+        </div>
+
+        <!-- EMPLOYEE MANAGEMENT (Admin only) -->
+        <div class="edit-panel" id="employee-panel">
+            <h3>Employees</h3>
+            <label>Username: <input type="text" id="new-emp-username"></label>
+            <label>Password: <input type="password" id="new-emp-password"></label>
+            <button onclick="createEmployee()">Create Employee</button>
+
+            <div id="employee-list" style="margin-top:12px; text-align:left;"></div>
+        </div>
+
     </div>
 
-    <div class="icon-row">
-        <div class="icon-box">
-            <div class="icon">⬇️</div>
-            <p class="icon-label">Download tasks</p>
+    <!-- WORKER DASHBOARD -->
+    <div id="worker-screen" class="screen">
+
+        <div class="top-bar">
+            <div class="menu-icon" onclick="openMenu()">☰</div>
+            <div class="app-title" id="worker-app-title">ጥቁሬ - Worker</div>
+            <select id="worker-lang-select" class="lang-selector" onchange="changeWorkerLanguage(this.value)">
+                <option value="am">አማርኛ</option>
+                <option value="om">Afaan Oromoo</option>
+                <option value="en">English</option>
+            </select>
         </div>
-        <div class="icon-box">
-            <div class="icon">✅</div>
-            <p class="icon-label">Mark done</p>
+
+        <div class="date-bar" id="worker-date">Today’s tasks</div>
+
+        <h2 class="section-title" id="worker-title">የዛሬ ሥራ ብዛት</h2>
+        <div class="big-number" id="worker-count">120</div>
+
+        <div class="action-row">
+            <button class="action-btn blue" id="inbound-btn">⬆️ Inbound items</button>
+            <button class="action-btn orange" id="outbound-btn">⬇️ Outbound items</button>
         </div>
+
+        <div class="icon-row">
+            <div class="icon-box">
+                <div class="icon">🔦</div>
+                <p class="icon-label" id="worker-scan-label">Scan item</p>
+            </div>
+            <div class="icon-box">
+                <div class="icon">🖨️</div>
+                <p class="icon-label" id="worker-print-label">Print label</p>
+            </div>
+        </div>
+
+        <div class="icon-row">
+            <div class="icon-box">
+                <div class="icon">⬇️</div>
+                <p class="icon-label" id="worker-download-label">Download tasks</p>
+            </div>
+            <div class="icon-box">
+                <div class="icon">✅</div>
+                <p class="icon-label" id="worker-mark-label">Mark done</p>
+            </div>
+        </div>
+
     </div>
 
-</div>
-
-
-
-    <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
-
-
