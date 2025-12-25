@@ -81,7 +81,7 @@
         <p class="switch-text" id="login-hint"></p>
     </div>
 
-    <!-- SIDE MENU -->
+    <!-- SIDE MENU (language + logout removed to avoid duplicates) -->
     <div id="side-menu" class="side-menu">
         <div class="menu-header">📋 Menu</div>
 
@@ -90,16 +90,8 @@
 
         <div class="menu-divider"></div>
 
-        <div class="menu-label">🌐 Language</div>
-        <select id="menu-lang" class="menu-lang" onchange="changeDashboardLanguage(this.value)">
-            <option value="am">አማርኛ</option>
-            <option value="om">Afaan Oromoo</option>
-            <option value="en">English</option>
-        </select>
-
+        <!-- kept only menu navigation; language + logout moved to header to avoid duplication -->
         <div class="menu-divider"></div>
-
-        <button class="menu-item logout" onclick="logout()">🚪 Logout</button>
     </div>
 
     <div id="menu-overlay" class="menu-overlay" onclick="closeMenu()"></div>
@@ -206,6 +198,7 @@
 <script src="app.js"></script>
 </body>
 </html>
+
 
 
 
