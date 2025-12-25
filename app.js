@@ -1,4 +1,4 @@
-// ---------- app.js (edited) ----------
+// ---------- app.js (updated) ----------
 
 // ---------- Simple persistence keys ----------
 const ADMIN_KEY = "tikure_admin";         // stores {user, pass}
@@ -60,24 +60,21 @@ function goBack() {
 }
 
 // ---------- UPDATED: show/hide back button and header controls ----------
-// Back button: visible from the second screen (role-screen) onward.
-// Header language select and logout: visible only on the main/admin page (admin-screen).
+// User requested: Back and Logout should appear on the first page (language-screen).
+// This function ensures Back is visible from the second page onward and also visible on the first page per request.
+// Logout and header language select will be visible on language-screen and admin-screen.
 function updateBackButtonVisibility(currentScreenId) {
     const back = $("back-btn");
     const langSelect = $("global-lang-select");
     const topLogout = $("top-logout");
 
-    // Back button: hidden only on the first language screen
+    // Back button: show on all screens (including language-screen) per user's request
     if (back) {
-        if (!currentScreenId || currentScreenId === "language-screen") {
-            back.style.display = "none";
-        } else {
-            back.style.display = "inline-block";
-        }
+        back.style.display = "inline-block";
     }
 
-    // Language menu and Logout: show only on the admin screen
-    const showOnScreens = ["admin-screen"]; // extend this array if you want more screens to show these controls
+    // Language menu and Logout: show on language-screen and admin-screen
+    const showOnScreens = ["language-screen", "admin-screen"];
     const shouldShowHeaderControls = showOnScreens.includes(currentScreenId);
 
     if (langSelect) {
@@ -113,8 +110,10 @@ function chooseWorker(){
 
 // ---------- Admin setup (first run) ----------
 function createInitialAdmin(){
-    const user = $("setup-admin-username").value.trim();
-    const pass = $("setup-admin-password").value.trim();
+    const userEl = $("setup-admin-username");
+    const passEl = $("setup-admin-password");
+    const user = userEl ? userEl.value.trim() : "";
+    const pass = passEl ? passEl.value.trim() : "";
     if (!user || !pass) { alert("Please enter username and password"); return; }
     localStorage.setItem(ADMIN_KEY, JSON.stringify({user, pass}));
     alert("Admin created. Please login.");
@@ -125,16 +124,18 @@ function createInitialAdmin(){
 let loginRole = null; // "admin" or "worker"
 function prepareLogin(role){
     loginRole = role;
-    $("login-username").value = "";
-    $("login-password").value = "";
-    $("login-title").innerText = role === "admin" ? "Admin Login" : "Worker Login";
-    $("login-hint").innerText = role === "admin" ? "" : "Enter your worker credentials";
+    if ($("login-username")) $("login-username").value = "";
+    if ($("login-password")) $("login-password").value = "";
+    if ($("login-title")) $("login-title").innerText = role === "admin" ? "Admin Login" : "Worker Login";
+    if ($("login-hint")) $("login-hint").innerText = role === "admin" ? "" : "Enter your worker credentials";
     showScreen("login-screen");
 }
 
 function loginUser(){
-    const user = $("login-username").value.trim();
-    const pass = $("login-password").value.trim();
+    const userEl = $("login-username");
+    const passEl = $("login-password");
+    const user = userEl ? userEl.value.trim() : "";
+    const pass = passEl ? passEl.value.trim() : "";
     if (!user || !pass) { alert("Please fill all fields"); return; }
 
     if (loginRole === "admin") {
@@ -176,13 +177,17 @@ function openWorkerAfterLogin(username){
 
 // ---------- Menu functions ----------
 function openMenu(){
-    $("side-menu").classList.add("open");
-    $("menu-overlay").classList.add("show");
+    const menu = $("side-menu");
+    const overlay = $("menu-overlay");
+    if (menu) menu.classList.add("open");
+    if (overlay) overlay.classList.add("show");
 }
 
 function closeMenu(){
-    $("side-menu").classList.remove("open");
-    $("menu-overlay").classList.remove("show");
+    const menu = $("side-menu");
+    const overlay = $("menu-overlay");
+    if (menu) menu.classList.remove("open");
+    if (overlay) overlay.classList.remove("show");
 }
 
 function openAdminFromMenu(){
@@ -206,8 +211,10 @@ function logout(){
 
 // ---------- Admin can create employees ----------
 function createEmployee(){
-    const user = $("new-emp-username").value.trim();
-    const pass = $("new-emp-password").value.trim();
+    const userEl = $("new-emp-username");
+    const passEl = $("new-emp-password");
+    const user = userEl ? userEl.value.trim() : "";
+    const pass = passEl ? passEl.value.trim() : "";
     if (!user || !pass) { alert("Enter username and password"); return; }
 
     let employees = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
@@ -215,8 +222,8 @@ function createEmployee(){
 
     employees.push({user, pass});
     localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
-    $("new-emp-username").value = "";
-    $("new-emp-password").value = "";
+    if (userEl) userEl.value = "";
+    if (passEl) passEl.value = "";
     renderEmployeeList();
 }
 
@@ -291,7 +298,7 @@ const dashboardTranslations = {
 };
 function changeDashboardLanguage(lang){
     localStorage.setItem(LANG_KEY, lang);
-    const t = dashboardTranslations[lang];
+    const t = dashboardTranslations[lang] || dashboardTranslations["am"];
 
     if ($("admin-app-title")) $("admin-app-title").innerText = t.appTitle;
     if ($("admin-title")) $("admin-title").innerText = t.adminTitle;
@@ -312,7 +319,7 @@ function changeDashboardLanguage(lang){
 // Worker translations (simple reuse)
 function changeWorkerLanguage(lang){
     localStorage.setItem(LANG_KEY, lang);
-    const t = dashboardTranslations[lang];
+    const t = dashboardTranslations[lang] || dashboardTranslations["am"];
     if ($("worker-app-title")) $("worker-app-title").innerText = t.appTitle + " - Worker";
     if ($("worker-title")) $("worker-title").innerText = t.adminTitle;
     if ($("worker-scan-label")) $("worker-scan-label").innerText = t.scanner;
@@ -337,6 +344,7 @@ let stockChart;
 
 function initStockChart() {
     const stock = getSavedStock();
+    // inputs may be removed from HTML; guard access
     if ($("stock-electronics")) $("stock-electronics").value = stock.electronics;
     if ($("stock-clothing")) $("stock-clothing").value = stock.clothing;
     if ($("stock-food")) $("stock-food").value = stock.food;
@@ -390,10 +398,11 @@ function getSavedStock(){
 }
 
 function updateStockChart() {
-    const e = Number($("stock-electronics").value || 0);
-    const c = Number($("stock-clothing").value || 0);
-    const f = Number($("stock-food").value || 0);
-    const fu = Number($("stock-furniture").value || 0);
+    // inputs may be removed; guard access
+    const e = $("stock-electronics") ? Number($("stock-electronics").value || 0) : 0;
+    const c = $("stock-clothing") ? Number($("stock-clothing").value || 0) : 0;
+    const f = $("stock-food") ? Number($("stock-food").value || 0) : 0;
+    const fu = $("stock-furniture") ? Number($("stock-furniture").value || 0) : 0;
 
     const stock = {electronics:e, clothing:c, food:f, furniture:fu};
     localStorage.setItem(STOCK_KEY, JSON.stringify(stock));
@@ -408,7 +417,7 @@ function updateStockChart() {
 
 function updateTotalValue(){
     const stock = getSavedStock();
-    const total = stock.electronics + stock.clothing + stock.food + stock.furniture;
+    const total = (stock.electronics||0) + (stock.clothing||0) + (stock.food||0) + (stock.furniture||0);
     if ($("total-value")) $("total-value").innerText = total.toLocaleString();
 }
 
@@ -428,6 +437,7 @@ window.addEventListener("load", () => {
     // ensure back button visibility is correct
     updateBackButtonVisibility(getCurrentScreenId());
 });
+
 
 
 
