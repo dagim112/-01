@@ -50,9 +50,9 @@ body {
 }
 
 #app-logo {
-    height: 56px;
+    height: 70px;
     pointer-events: auto;
-    border-radius: 6px;
+    border-radius: 9px;
 }
 
 /* Screens */
