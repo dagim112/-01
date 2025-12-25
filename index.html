@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Tikure App</title>
@@ -11,10 +10,10 @@
 
     <!-- GLOBAL LOGO (always on top center) -->
     <header id="global-header">
-        <img id="app-logo" src="https://github.com/dagim112/-01/blob/main/logo.png" alt="App Logo">
+        <!-- Replace with your logo file name or hosted URL -->
+        <img id="app-logo" src="logo.png" alt="App Logo">
         <!-- GLOBAL BACK BUTTON (single instance) -->
-<button id="back-btn" class="back-btn" onclick="goBack()" aria-label="Back">← Back</button>
-
+        <button id="back-btn" class="back-btn" onclick="goBack()" aria-label="Back">← Back</button>
     </header>
 
     <!-- LANGUAGE SELECTION SCREEN -->
@@ -107,17 +106,22 @@
             </select>
         </div>
 
+        <!-- ADMIN TOP ACTIONS -->
+        <div id="admin-top-actions" class="admin-top-actions">
+            <button class="top-action-btn" onclick="openEmployeePanel()">Employees</button>
+            <button class="top-action-btn" onclick="openSettings()">Settings</button>
+            <button class="top-action-btn" onclick="openProfit()">Profit</button>
+            <button class="top-action-btn" onclick="openCustomers()">Customers</button>
+            <button class="top-action-btn" onclick="showLowStock()">Low stock</button>
+            <button class="top-action-btn danger" onclick="deleteStockData()">Delete stock</button>
+        </div>
+
         <!-- DATE -->
         <div class="date-bar" id="top-date">Tue. Apr 30</div>
 
         <!-- TITLE + TOTAL -->
         <h2 class="section-title" id="admin-title">የእርምራ ለመመልከት ቁጥር</h2>
         <div class="big-number" id="total-value">22,450</div>
-
-        <!-- PIE CHART -->
-        <div class="chart-container">
-            <canvas id="stockChart"></canvas>
-        </div>
 
         <!-- BIG BUY / SELL BUTTONS -->
         <div class="action-row">
@@ -155,14 +159,14 @@
             </div>
         </div>
 
-        <!-- SIMPLE EDIT FORM FOR STOCK DATA -->
+        <!-- SIMPLE EDIT FORM FOR STOCK DATA (chart removed) -->
         <div class="edit-panel">
             <h3>Edit stock data</h3>
             <label>Electronics: <input type="number" id="stock-electronics" value="8500"></label>
             <label>Clothing: <input type="number" id="stock-clothing" value="6200"></label>
             <label>Food: <input type="number" id="stock-food" value="4300"></label>
             <label>Furniture: <input type="number" id="stock-furniture" value="3450"></label>
-            <button onclick="updateStockChart()">Update chart</button>
+            <button onclick="updateStockChart()">Save stock</button>
         </div>
 
         <!-- EMPLOYEE MANAGEMENT (Admin only) -->
@@ -227,3 +231,4 @@
 <script src="app.js"></script>
 </body>
 </html>
+
