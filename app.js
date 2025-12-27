@@ -191,6 +191,11 @@ window.addEventListener("load",()=>{
     showScreen("language-screen",{replace:true});
     setTimeout(initScanner,100);
 });
+if ($("sell-btn")) $("sell-btn").onclick = () => setMode("SELL");
+if ($("buy-btn")) $("buy-btn").onclick = () => setMode("BUY");
+if ($("inbound-btn")) $("inbound-btn").onclick = () => setMode("INBOUND");
+if ($("outbound-btn")) $("outbound-btn").onclick = () => setMode("OUTBOUND");
+
 
 
 
