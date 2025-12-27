@@ -1,57 +1,49 @@
-// ---------- app.js (FULL with scanner support) ----------
+// =======================================================
+// TIKURE / TQURE APP — FULL LOGIC WITH SCANNER
+// =======================================================
 
-// ---------- Simple persistence keys ----------
+// ---------- Storage keys ----------
 const ADMIN_KEY = "tikure_admin";
 const EMPLOYEES_KEY = "tikure_employees";
 const STOCK_KEY = "tikure_stock";
+const WAREHOUSE_KEY = "tikure_warehouse";
 const LANG_KEY = "appLanguage";
 
-// ---------- Small DOM helper ----------
+// ---------- Helpers ----------
 function $(id){ return document.getElementById(id); }
 
-// ---------- Navigation history ----------
+// ---------- Navigation ----------
 const navStack = [];
 
 function getCurrentScreenId() {
-    const visible = Array.from(document.querySelectorAll(".screen"))
-        .find(s => s.style.display !== "none");
-    return visible ? visible.id : null;
+    const s = [...document.querySelectorAll(".screen")]
+        .find(e => e.style.display !== "none");
+    return s ? s.id : null;
 }
 
-function showScreen(id, options = { replace:false }) {
-    const current = getCurrentScreenId();
-    if (current && !options.replace) navStack.push(current);
-
-    document.querySelectorAll(".screen").forEach(s => s.style.display = "none");
-    if ($(id)) $(id).style.display = "block";
-
-    updateBackButtonVisibility(id);
-
-    // re-focus scanner when screen changes
-    setTimeout(initScanner, 50);
+function showScreen(id, options={replace:false}) {
+    const cur = getCurrentScreenId();
+    if (cur && !options.replace) navStack.push(cur);
+    document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
+    if ($(id)) $(id).style.display="block";
+    setTimeout(initScanner,50);
 }
 
 function goBack(){
-    if (navStack.length === 0) return;
-    showScreen(navStack.pop(), { replace:true });
-}
-
-// ---------- Header controls ----------
-function updateBackButtonVisibility(){
-    if ($("back-btn")) $("back-btn").style.display = "inline-block";
-    if ($("top-logout")) $("top-logout").style.display = "inline-block";
+    if (!navStack.length) return;
+    showScreen(navStack.pop(), {replace:true});
 }
 
 // ---------- Language ----------
 function setLanguage(lang){
     localStorage.setItem(LANG_KEY, lang);
-    showScreen("role-screen", { replace:true });
+    showScreen("role-screen",{replace:true});
 }
 
-// ---------- Role ----------
+// ---------- Roles ----------
 function chooseAdmin(){
-    const admin = JSON.parse(localStorage.getItem(ADMIN_KEY));
-    admin ? prepareLogin("admin") : showScreen("admin-setup-screen");
+    const a = JSON.parse(localStorage.getItem(ADMIN_KEY));
+    a ? prepareLogin("admin") : showScreen("admin-setup-screen");
 }
 
 function chooseWorker(){
@@ -60,98 +52,146 @@ function chooseWorker(){
 
 // ---------- Admin setup ----------
 function createInitialAdmin(){
-    const u = $("setup-admin-username").value.trim();
-    const p = $("setup-admin-password").value.trim();
-    if (!u || !p) return alert("Fill all fields");
-    localStorage.setItem(ADMIN_KEY, JSON.stringify({user:u, pass:p}));
+    const u=$("setup-admin-username").value.trim();
+    const p=$("setup-admin-password").value.trim();
+    if(!u||!p) return alert("Fill all fields");
+    localStorage.setItem(ADMIN_KEY,JSON.stringify({user:u,pass:p}));
     alert("Admin created");
     prepareLogin("admin");
 }
 
 // ---------- Login ----------
-let loginRole = null;
+let loginRole=null;
 
 function prepareLogin(role){
-    loginRole = role;
-    $("login-username").value = "";
-    $("login-password").value = "";
-    $("login-title").innerText = role === "admin" ? "Admin Login" : "Worker Login";
+    loginRole=role;
+    $("login-username").value="";
+    $("login-password").value="";
     showScreen("login-screen");
 }
 
 function loginUser(){
-    const u = $("login-username").value.trim();
-    const p = $("login-password").value.trim();
-    if (!u || !p) return alert("Missing fields");
+    const u=$("login-username").value.trim();
+    const p=$("login-password").value.trim();
+    if(!u||!p) return alert("Missing fields");
 
-    if (loginRole === "admin") {
-        const a = JSON.parse(localStorage.getItem(ADMIN_KEY));
-        if (a && a.user === u && a.pass === p) openAdminAfterLogin();
-        else alert("Invalid admin");
+    if(loginRole==="admin"){
+        const a=JSON.parse(localStorage.getItem(ADMIN_KEY));
+        a && a.user===u && a.pass===p
+            ? showScreen("admin-screen",{replace:true})
+            : alert("Invalid admin");
     } else {
-        const emps = JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || "[]");
-        const ok = emps.find(e => e.user === u && e.pass === p);
-        ok ? openWorkerAfterLogin(u) : alert("Invalid worker");
+        const e=JSON.parse(localStorage.getItem(EMPLOYEES_KEY)||"[]")
+            .find(x=>x.user===u&&x.pass===p);
+        e ? showScreen("worker-screen",{replace:true})
+          : alert("Invalid worker");
     }
-}
-
-// ---------- After login ----------
-function openAdminAfterLogin(){
-    showScreen("admin-screen", { replace:true });
-}
-
-function openWorkerAfterLogin(){
-    showScreen("worker-screen", { replace:true });
 }
 
 // ---------- Logout ----------
 function logout(){
-    navStack.length = 0;
-    showScreen("role-screen", { replace:true });
+    navStack.length=0;
+    showScreen("role-screen",{replace:true});
 }
 
 // =======================================================
-// 🔦 SCANNER SUPPORT (STAZA 2D)
+// 📦 STOCK + WAREHOUSE DATA
 // =======================================================
 
-let scannerInput = null;
+function getStock(){
+    return JSON.parse(localStorage.getItem(STOCK_KEY)) || {total:0};
+}
+function saveStock(s){
+    localStorage.setItem(STOCK_KEY,JSON.stringify(s));
+}
 
+function getWarehouse(){
+    return JSON.parse(localStorage.getItem(WAREHOUSE_KEY)) || {total:0};
+}
+function saveWarehouse(w){
+    localStorage.setItem(WAREHOUSE_KEY,JSON.stringify(w));
+}
+
+// =======================================================
+// 🔦 SCANNER LOGIC
+// =======================================================
+
+let scannerMode = null; // SELL, BUY, INBOUND, OUTBOUND
+
+function setMode(mode){
+    scannerMode = mode;
+    alert("Scanner mode: " + mode);
+}
+
+// Buttons (ADMIN – shop)
+if ($("sell-btn")) $("sell-btn").onclick = () => setMode("SELL");
+if ($("buy-btn")) $("buy-btn").onclick = () => setMode("BUY");
+
+// Buttons (WORKER – warehouse)
+if ($("inbound-btn")) $("inbound-btn").onclick = () => setMode("INBOUND");
+if ($("outbound-btn")) $("outbound-btn").onclick = () => setMode("OUTBOUND");
+
+// ---------- Scanner ----------
 function initScanner(){
-    scannerInput = $("scanner-input");
-    if (!scannerInput) return;
-
-    scannerInput.value = "";
-    scannerInput.focus();
-
-    scannerInput.onkeydown = (e) => {
-        if (e.key === "Enter") {
-            const code = scannerInput.value.trim();
-            scannerInput.value = "";
-            if (code) handleScan(code);
+    const input=$("scanner-input");
+    if(!input) return;
+    input.value="";
+    input.focus();
+    input.onkeydown=(e)=>{
+        if(e.key==="Enter"){
+            const code=input.value.trim();
+            input.value="";
+            if(code) handleScan(code);
         }
     };
 }
 
 function handleScan(code){
-    console.log("SCANNED:", code);
-    const screen = getCurrentScreenId();
+    console.log("SCANNED:",code,"MODE:",scannerMode);
 
-    if (screen === "admin-screen") {
-        alert("Admin scanned: " + code);
-        // TODO: add stock logic
+    if(!scannerMode){
+        alert("Select Sell / Buy / Inbound / Outbound first");
+        return;
     }
 
-    if (screen === "worker-screen") {
-        alert("Worker scanned: " + code);
-        // TODO: inbound / outbound logic
+    if(scannerMode==="SELL"){
+        const s=getStock();
+        s.total=Math.max(0,s.total-1);
+        saveStock(s);
+        alert("Sold item: "+code+"\nStock: "+s.total);
+    }
+
+    if(scannerMode==="BUY"){
+        const s=getStock();
+        s.total+=1;
+        saveStock(s);
+        alert("Bought item: "+code+"\nStock: "+s.total);
+    }
+
+    if(scannerMode==="INBOUND"){
+        const w=getWarehouse();
+        w.total+=1;
+        saveWarehouse(w);
+        alert("Inbound item: "+code+"\nWarehouse: "+w.total);
+    }
+
+    if(scannerMode==="OUTBOUND"){
+        const w=getWarehouse();
+        w.total=Math.max(0,w.total-1);
+        saveWarehouse(w);
+        alert("Outbound item: "+code+"\nWarehouse: "+w.total);
     }
 }
 
-// ---------- App init ----------
-window.addEventListener("load", () => {
-    showScreen("language-screen", { replace:true });
-    setTimeout(initScanner, 100);
+// =======================================================
+// 🚀 INIT
+// =======================================================
+
+window.addEventListener("load",()=>{
+    showScreen("language-screen",{replace:true});
+    setTimeout(initScanner,100);
 });
+
 
 
 
