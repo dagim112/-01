@@ -26,7 +26,8 @@ function showScreen(id, options={replace:false}) {
     if (cur && !options.replace) navStack.push(cur);
     document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
     if ($(id)) $(id).style.display="block";
-    setTimeout(initScanner,50);
+    // focus scanner if scan screen
+    if(id==="scan-screen") setTimeout(initScanner,50);
 }
 
 function goBack(){
@@ -120,14 +121,17 @@ let scannerMode = null; // SELL, BUY, INBOUND, OUTBOUND
 
 function setMode(mode){
     scannerMode = mode;
-    alert("Scanner mode: " + mode);
+    // Navigate to scan screen
+    showScreen("scan-screen");
+    $("scan-mode-title").innerText = "Scan Mode: " + mode;
+    $("scan-info").innerText = "Scan an item now";
 }
 
-// Buttons (ADMIN – shop)
+// ---------- Buttons ----------
+// ADMIN – shop
 if ($("sell-btn")) $("sell-btn").onclick = () => setMode("SELL");
 if ($("buy-btn")) $("buy-btn").onclick = () => setMode("BUY");
-
-// Buttons (WORKER – warehouse)
+// WORKER – warehouse
 if ($("inbound-btn")) $("inbound-btn").onclick = () => setMode("INBOUND");
 if ($("outbound-btn")) $("outbound-btn").onclick = () => setMode("OUTBOUND");
 
@@ -147,40 +151,42 @@ function initScanner(){
 }
 
 function handleScan(code){
-    console.log("SCANNED:",code,"MODE:",scannerMode);
-
     if(!scannerMode){
         alert("Select Sell / Buy / Inbound / Outbound first");
         return;
     }
 
+    let result = "";
     if(scannerMode==="SELL"){
         const s=getStock();
         s.total=Math.max(0,s.total-1);
         saveStock(s);
-        alert("Sold item: "+code+"\nStock: "+s.total);
+        result = `Sold: ${code} | Stock: ${s.total}`;
     }
 
     if(scannerMode==="BUY"){
         const s=getStock();
         s.total+=1;
         saveStock(s);
-        alert("Bought item: "+code+"\nStock: "+s.total);
+        result = `Bought: ${code} | Stock: ${s.total}`;
     }
 
     if(scannerMode==="INBOUND"){
         const w=getWarehouse();
         w.total+=1;
         saveWarehouse(w);
-        alert("Inbound item: "+code+"\nWarehouse: "+w.total);
+        result = `Inbound: ${code} | Warehouse: ${w.total}`;
     }
 
     if(scannerMode==="OUTBOUND"){
         const w=getWarehouse();
         w.total=Math.max(0,w.total-1);
         saveWarehouse(w);
-        alert("Outbound item: "+code+"\nWarehouse: "+w.total);
+        result = `Outbound: ${code} | Warehouse: ${w.total}`;
     }
+
+    $("scan-info").innerText = result;
+    $("scanner-input").focus();
 }
 
 // =======================================================
@@ -191,10 +197,7 @@ window.addEventListener("load",()=>{
     showScreen("language-screen",{replace:true});
     setTimeout(initScanner,100);
 });
-if ($("sell-btn")) $("sell-btn").onclick = () => setMode("SELL");
-if ($("buy-btn")) $("buy-btn").onclick = () => setMode("BUY");
-if ($("inbound-btn")) $("inbound-btn").onclick = () => setMode("INBOUND");
-if ($("outbound-btn")) $("outbound-btn").onclick = () => setMode("OUTBOUND");
+
 
 
 
