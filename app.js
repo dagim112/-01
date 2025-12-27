@@ -26,7 +26,11 @@ function showScreen(id, options={replace:false}) {
     if (cur && !options.replace) navStack.push(cur);
     document.querySelectorAll(".screen").forEach(s=>s.style.display="none");
     if ($(id)) $(id).style.display="block";
-    // focus scanner if scan screen
+
+    // Always show header
+    if($("global-header")) $("global-header").style.display="flex";
+
+    // Init scanner if scan screen
     if(id==="scan-screen") setTimeout(initScanner,50);
 }
 
@@ -123,8 +127,8 @@ function setMode(mode){
     scannerMode = mode;
     // Navigate to scan screen
     showScreen("scan-screen");
-    $("scan-mode-title").innerText = "Scan Mode: " + mode;
-    $("scan-info").innerText = "Scan an item now";
+    if($("scan-mode-title")) $("scan-mode-title").innerText = "Scan Mode: " + mode;
+    if($("scan-info")) $("scan-info").innerText = "Ready to scan...";
 }
 
 // ---------- Buttons ----------
@@ -152,7 +156,7 @@ function initScanner(){
 
 function handleScan(code){
     if(!scannerMode){
-        alert("Select Sell / Buy / Inbound / Outbound first");
+        if($("scan-info")) $("scan-info").innerText = "Select Sell / Buy / Inbound / Outbound first";
         return;
     }
 
@@ -185,8 +189,11 @@ function handleScan(code){
         result = `Outbound: ${code} | Warehouse: ${w.total}`;
     }
 
-    $("scan-info").innerText = result;
-    $("scanner-input").focus();
+    // Show scanned info inline
+    if($("scan-info")) $("scan-info").innerText = result;
+
+    // Keep focus for next scan
+    if($("scanner-input")) $("scanner-input").focus();
 }
 
 // =======================================================
@@ -195,8 +202,8 @@ function handleScan(code){
 
 window.addEventListener("load",()=>{
     showScreen("language-screen",{replace:true});
-    setTimeout(initScanner,100);
 });
+
 
 
 
