@@ -1,15 +1,15 @@
 /* ========================== */
 /* Base Colors & Reset        */
 /* ========================== */
-:root{
-  --bg: #0d0d0d;
-  --panel: #1f1f1f;
-  --muted: #aaa;
-  --accent: #005eff;
-  --danger: #660000;
-  --card: #2a2a2a;
-  --green: #00cc66;
-  --orange: #ff6600;
+:root {
+    --bg: #0d0d0d;
+    --panel: #1f1f1f;
+    --muted: #aaa;
+    --accent: #005eff;
+    --danger: #660000;
+    --card: #2a2a2a;
+    --green: #00cc66;
+    --orange: #ff6600;
 }
 
 * { box-sizing: border-box; }
@@ -20,7 +20,6 @@ body {
     color: white;
     background: var(--bg);
     text-align: center;
-    -webkit-font-smoothing: antialiased;
 }
 
 /* ========================== */
@@ -31,7 +30,7 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 100px;
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,92 +38,64 @@ body {
     background: var(--panel);
     z-index: 3000;
 }
+#global-header img { height: 60px; border-radius: 12px; }
+#global-header button { padding: 8px 12px; border-radius: 8px; border:none; cursor:pointer; }
+#global-header button:active { transform: translateY(2px); }
 
-.header-left, .header-center, .header-right {
-    display: flex;
-    align-items: center;
+/* ========================== */
+/* SCREENS                    */
+/* ========================== */
+.screen, .step-screen { display: none; padding-top:100px; min-height:100vh; }
+.screen h1, .screen h2 { margin-bottom:20px; color:white; }
+.screen button, .step-screen button { padding:12px; font-size:16px; border:none; border-radius:8px; cursor:pointer; background: var(--panel); color:white; margin:6px; }
+.screen button:active, .step-screen button:active { transform: translateY(2px); }
+
+/* ========================== */
+/* INPUTS                     */
+/* ========================== */
+input[type=text], input[type=password], input[type=number] {
+    width: 70%; padding: 10px; margin: 6px 0; border-radius: 6px; border:none; background:#222; color:white; font-size:16px;
 }
-.header-left { min-width: 60px; justify-content: flex-start; }
-.header-center { flex:1; justify-content:center; }
-.header-right { gap:8px; justify-content:flex-end; }
-
-#app-logo { height: 80px; border-radius:20px; }
-
-/* Buttons in header */
-.back-btn, .top-logout { 
-    padding: 8px 12px; border-radius: 8px; border:none; cursor:pointer;
-}
-.back-btn { background: var(--panel); color:white; box-shadow:0 3px 0 #000; }
-.back-btn:active { transform: translateY(3px); box-shadow:none; }
-.top-logout { background: var(--danger); color:white; box-shadow:0 3px 0 #000; }
-.top-logout:active { transform: translateY(3px); box-shadow:none; }
-
-/* Language select */
-.lang-selector { padding:6px; border-radius:6px; background: #222; border:1px solid #444; color:white; }
 
 /* ========================== */
-/* Screens                    */
+/* ACTION ROWS                */
 /* ========================== */
-.screen { display:none; padding-top:120px; min-height:100vh; }
-#language-screen { display:block; }
-.choose-text { font-size:20px; margin-bottom:20px; }
-.language-buttons { display:flex; flex-direction:column; gap:12px; width:60%; margin:auto; }
-.lang-btn { padding:12px; font-size:18px; border:none; border-radius:8px; cursor:pointer; background: var(--panel); color:white; }
-.lang-btn.default { background: var(--accent); }
-
-/* Inputs and main buttons */
-.input-group { margin:12px auto; width:70%; }
-.input-group input { width:100%; padding:12px; border-radius:8px; border:none; background:#222; color:white; font-size:16px; }
-.main-btn { width:70%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-size:18px; margin-top:12px; cursor:pointer; }
-
-/* ========================== */
-/* DASHBOARD / ACTION ROWS     */
-/* ========================== */
-.action-row { display:flex; justify-content:center; gap:16px; margin:18px 0; flex-wrap:wrap; }
+.action-row { display:flex; justify-content:center; gap:12px; margin:18px 0; flex-wrap:wrap; }
 .action-btn { padding:14px 22px; font-size:16px; border:none; border-radius:12px; box-shadow:0 4px 0 #000; cursor:pointer; min-width:140px; }
 .action-btn:active { transform: translateY(4px); box-shadow:0 0 0 #000; }
 .action-btn.blue { background: var(--accent); color:white; }
 .action-btn.orange { background: var(--orange); color:white; }
 .action-btn.green { background: var(--green); color:white; }
 
-/* Icon Boxes */
-.icon-row { display:flex; justify-content:center; gap:28px; margin:18px 0; flex-wrap:wrap; }
-.icon-box { background: var(--card); width:110px; height:110px; border-radius:16px; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:36px; box-shadow:0 4px 0 #000; transition:0.15s; cursor:pointer; }
-.icon-box:active { transform:translateY(4px); box-shadow:0 0 0 #000; }
-.icon-label { font-size:13px; color:#ccc; margin-top:8px; text-align:center; }
-
 /* ========================== */
-/* INBOUND / OUTBOUND STEPS    */
+/* STEP LISTS                 */
 /* ========================== */
-.step-screen { display:none; padding:20px; text-align:center; }
-.step-screen h2 { margin-bottom:20px; color:white; }
-.step-screen .step-list { display:flex; flex-direction:column; gap:10px; max-width:400px; margin: auto; }
-.step-screen .step-list button { padding:12px; border:none; border-radius:8px; background:var(--panel); color:white; cursor:pointer; }
-.step-screen .step-list button:active { transform:translateY(2px); }
+.step-list { display:flex; flex-direction:column; gap:10px; max-width:400px; margin:auto; }
 .step-controls { margin-top:20px; display:flex; justify-content:center; gap:12px; }
-.step-controls button { padding:10px 16px; border:none; border-radius:8px; background:var(--accent); color:white; cursor:pointer; }
-.step-controls button:active { transform:translateY(2px); }
+.step-controls button { background: var(--accent); color:white; }
 
-/* Scanner screens */
-#scan-screen, #outbound-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; color:white; }
-#scan-count, #out-scan-count { font-size:48px; font-weight:bold; color:#00ffcc; }
-#scan-info, #out-scan-info { font-size:16px; color:#ccc; }
+/* ========================== */
+/* SCANNER                     */
+/* ========================== */
+#scan-count { font-size:48px; font-weight:bold; color:#00ffcc; margin:12px 0; }
+#scan-info { font-size:16px; color:#ccc; margin-bottom:12px; }
 
-/* Supplier list */
-#supplier-list { display:flex; flex-direction:column; gap:8px; margin:12px auto; max-width:400px; }
-#supplier-list button { padding:10px; border:none; border-radius:8px; background:var(--panel); color:white; cursor:pointer; }
-#supplier-list button:active { transform:translateY(2px); }
+/* ========================== */
+/* TABLES                     */
+/* ========================== */
+table { width:90%; margin:20px auto; border-collapse: collapse; color:white; }
+th, td { border: 1px solid #444; padding: 8px; }
+th { background: var(--panel); }
+tr:nth-child(even) { background: #1a1a1a; }
 
-/* Profit screen */
-#profit-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; }
-#profit-total { font-size:48px; color:#00ffcc; font-weight:bold; }
-.profit-filters { display:flex; gap:12px; }
-
-/* Responsive adjustments */
-@media(max-width:600px){
-    .language-buttons, .step-screen .step-list, .action-row, .icon-row { width:90%; margin:auto; }
-    #app-logo { height:48px; }
+/* ========================== */
+/* RESPONSIVE                 */
+/* ========================== */
+@media(max-width:600px) {
+    .action-row, .step-list, table { width:95%; }
+    #global-header img { height:48px; }
 }
+
 
 
 
