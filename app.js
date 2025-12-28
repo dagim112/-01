@@ -1,277 +1,324 @@
-// =======================================================
-// TIKURE APP — FULL LOGIC WITH INBOUND/OUTBOUND & SELL/BUY
-// =======================================================
+// =============================
+// Tikure App — Full JS Logic
+// =============================
 
-// ---------- Storage keys ----------
-const ADMIN_KEY = "tikure_admin";
-const EMPLOYEES_KEY = "tikure_employees";
-const STOCK_KEY = "tikure_stock";
-const WAREHOUSE_KEY = "tikure_warehouse";
-const OUTBOUND_LIST_KEY = "tikure_outbound_list";
-const SUPPLIERS_KEY = "tikure_suppliers";
-const LANG_KEY = "appLanguage";
-const PROFIT_KEY = "tikure_profit";
+// ======= GLOBAL VARIABLES =======
+let navStack = [];
+let currentUser = "";
+let inboundData = {};
+let inboundCount = 0;
 
-// ---------- Helpers ----------
-function $(id){ return document.getElementById(id); }
-function showScreen(id){ 
-    document.querySelectorAll(".screen, .step-screen").forEach(s=>s.style.display="none");
-    if($(id)) $(id).style.display="block";
-}
-const navStack = [];
-function goBack(){ 
-    if(navStack.length) showScreen(navStack.pop());
+// ======= NAVIGATION =======
+function showScreen(id) {
+    document.querySelectorAll(".screen,.step-screen").forEach(s => s.style.display = "none");
+    const el = document.getElementById(id);
+    if (el) el.style.display = "block";
+    navStack.push(id);
 }
 
-// ---------- Language ----------
-function setLanguage(lang){
-    localStorage.setItem(LANG_KEY, lang);
-    showScreen("role-screen");
+function goBack() {
+    navStack.pop();
+    showScreen(navStack.pop() || "language-screen");
 }
 
-// ---------- Roles ----------
-function chooseAdmin(){
-    const a = JSON.parse(localStorage.getItem(ADMIN_KEY));
-    a ? prepareLogin("admin") : showScreen("admin-setup-screen");
-}
-function chooseWorker(){
-    prepareLogin("worker");
-}
-
-// ---------- Admin setup ----------
-function createInitialAdmin(){
-    const u=$("setup-admin-username").value.trim();
-    const p=$("setup-admin-password").value.trim();
-    if(!u||!p){ alert("Fill all fields"); return;}
-    localStorage.setItem(ADMIN_KEY, JSON.stringify({user:u, pass:p}));
-    alert("Admin created");
-    prepareLogin("admin");
-}
-
-// ---------- Login ----------
-let loginRole = null;
-function prepareLogin(role){
-    loginRole=role;
-    $("login-username").value="";
-    $("login-password").value="";
-    showScreen("login-screen");
-}
-function loginUser(){
-    const u=$("login-username").value.trim();
-    const p=$("login-password").value.trim();
-    if(!u||!p){ alert("Missing fields"); return; }
-
-    if(loginRole==="admin"){
-        const a=JSON.parse(localStorage.getItem(ADMIN_KEY));
-        a && a.user===u && a.pass===p ? showScreen("admin-screen") : alert("Invalid admin");
-    } else {
-        const e=JSON.parse(localStorage.getItem(EMPLOYEES_KEY)||"[]")
-            .find(x=>x.user===u && x.pass===p);
-        e ? showScreen("worker-screen") : alert("Invalid worker");
-    }
-}
-
-// ---------- Logout ----------
-function logout(){
-    navStack.length=0;
+function logout() {
+    navStack = [];
     showScreen("language-screen");
 }
 
-// =======================================================
-// 📦 STORAGE
-// =======================================================
-function getStock(){ return JSON.parse(localStorage.getItem(STOCK_KEY))||{total:0,money:0,items:[]}; }
-function saveStock(s){ localStorage.setItem(STOCK_KEY,JSON.stringify(s)); }
+// ======= CLOCK =======
+setInterval(() => {
+    const c = document.getElementById("clock");
+    if (c) c.textContent = new Date().toLocaleTimeString();
+}, 1000);
 
-function getWarehouse(){ return JSON.parse(localStorage.getItem(WAREHOUSE_KEY))||{total:0,items:[]}; }
-function saveWarehouse(w){ localStorage.setItem(WAREHOUSE_KEY,JSON.stringify(w)); }
-
-function getOutboundList(){ return JSON.parse(localStorage.getItem(OUTBOUND_LIST_KEY))||[]; }
-function saveOutboundList(list){ localStorage.setItem(OUTBOUND_LIST_KEY,JSON.stringify(list)); }
-
-function getSuppliers(){ return JSON.parse(localStorage.getItem(SUPPLIERS_KEY))||[]; }
-function saveSuppliers(list){ localStorage.setItem(SUPPLIERS_KEY,JSON.stringify(list)); }
-
-function getProfit(){ return JSON.parse(localStorage.getItem(PROFIT_KEY))||0; }
-function saveProfit(value){ localStorage.setItem(PROFIT_KEY,JSON.stringify(value)); $("profit-total").innerText=value; }
-
-// =======================================================
-// 🔦 SCANNER MODE
-// =======================================================
-let scannerMode = null;
-let inboundData = {};
-let inboundCount = 0;
-let outboundCount = 0;
-
-// ---------- Admin Buttons ----------
-if($("sell-btn")) $("sell-btn").onclick = ()=>setMode("SELL");
-if($("buy-btn")) $("buy-btn").onclick = ()=>{ alert("Buy items from warehouse outbound list"); };
-
-if($("add-btn")) $("add-btn").onclick = ()=>startInbound();
-if($("remove-btn")) $("remove-btn").onclick = ()=>startOutbound();
-if($("profit-btn")) $("profit-btn").onclick = ()=>showScreen("profit-screen");
-
-// ---------- Worker Buttons ----------
-if($("inbound-btn")) $("inbound-btn").onclick = ()=>startInbound();
-if($("outbound-btn")) $("outbound-btn").onclick = ()=>startOutbound();
-
-// ---------- SCANNER ----------
-function initScanner(){
-    const input=$("scanner-input");
-    if(!input) return;
-    input.value="";
-    input.focus();
-    input.onkeydown = (e)=>{
-        if(e.key==="Enter"){
-            const code=input.value.trim();
-            input.value="";
-            if(code) handleScan(code);
-        }
-    };
+// ======= INIT DEFAULTS =======
+function initDefaults() {
+    if (!localStorage.getItem("suppliers")) localStorage.setItem("suppliers", JSON.stringify(["Supplier A","Supplier B"]));
+    if (!localStorage.getItem("categories")) localStorage.setItem("categories", JSON.stringify(["Category 1","Category 2"]));
+    if (!localStorage.getItem("units")) localStorage.setItem("units", JSON.stringify(["Unit 1","Unit 2"]));
+    if (!localStorage.getItem("stock")) localStorage.setItem("stock", JSON.stringify([]));
+    if (!localStorage.getItem("outbound")) localStorage.setItem("outbound", JSON.stringify([]));
+    if (!localStorage.getItem("store")) localStorage.setItem("store", JSON.stringify([]));
 }
 
-function handleScan(code){
-    if(scannerMode==="INBOUND"){
-        inboundCount++;
-        $("scan-count").innerText = inboundCount;
-        const warehouse = getWarehouse();
-        warehouse.items.push({
-            code: code,
-            category: inboundData.category,
-            supplier: inboundData.supplier,
-            unit: inboundData.unit,
-            price: inboundData.price,
-            date: new Date().toLocaleDateString(),
-            time: new Date().toLocaleTimeString()
-        });
-        warehouse.total = warehouse.items.length;
-        saveWarehouse(warehouse);
-        if(loginRole==="admin") saveProfit(getProfit()+parseFloat(inboundData.price));
-    }
-
-    if(scannerMode==="OUTBOUND"){
-        outboundCount++;
-        $("out-scan-count").innerText = outboundCount;
-        const warehouse = getWarehouse();
-        const index = warehouse.items.findIndex(it=>it.code===code);
-        if(index===-1){ $("out-scan-info").innerText="Item not in warehouse"; return; }
-        const item = warehouse.items.splice(index,1)[0];
-        warehouse.total = warehouse.items.length;
-        saveWarehouse(warehouse);
-        saveOutboundList(getOutboundList().concat(item));
-        $("out-scan-info").innerText=`Scanned ${outboundCount} items`;
-    }
-
-    $("scanner-input").focus();
+// ======= LANGUAGE & ROLE =======
+function setLanguage(lang) {
+    showScreen("role-screen");
 }
 
-// =======================================================
-// ✅ INBOUND FLOW
-// =======================================================
-function startInbound(){
+function chooseAdmin() {
+    currentUser = "Admin";
+    showScreen("login-screen");
+}
+
+function chooseWorker() {
+    currentUser = "Worker";
+    showScreen("login-screen");
+}
+
+function loginUser() {
+    const user = document.getElementById("login-username").value.trim();
+    const pass = document.getElementById("login-password").value.trim();
+    if (!user || !pass) { alert("Enter username and password"); return; }
+    // For simplicity, allow any login
+    showScreen(currentUser === "Admin" ? "admin-screen" : "worker-screen");
+}
+
+// =============================
+// INBOUND FLOW
+// =============================
+function startInbound() {
     inboundData = {};
     inboundCount = 0;
-    scannerMode="INBOUND";
     showSuppliers();
 }
 
-function showSuppliers(){
-    const list = getSuppliers();
-    const container = $("supplier-list");
-    container.innerHTML="";
-    list.forEach((s,i)=>{
+function showSuppliers() {
+    const container = document.getElementById("supplier-list");
+    container.innerHTML = "";
+    const suppliers = JSON.parse(localStorage.getItem("suppliers") || "[]");
+    suppliers.forEach(s => {
         const btn = document.createElement("button");
-        btn.innerText = `${s.name} | ${s.country} | ${s.tel}`;
-        btn.onclick = ()=>{ inboundData.supplier = s.name; nextInboundStep('type'); };
+        btn.textContent = s;
+        btn.onclick = () => { inboundData.supplier = s; showScreen("inbound-step2"); };
         container.appendChild(btn);
     });
     showScreen("inbound-step1");
 }
 
-function addSupplier(){
-    const name = prompt("Supplier Name");
-    if(!name) return;
-    const country = prompt("Country");
-    const tel = prompt("Telephone");
-    const suppliers = getSuppliers();
-    suppliers.push({name, country, tel});
-    saveSuppliers(suppliers);
+function addSupplier() {
+    const s = prompt("Enter Supplier Name");
+    if (!s) return;
+    const arr = JSON.parse(localStorage.getItem("suppliers") || "[]");
+    arr.push(s);
+    localStorage.setItem("suppliers", JSON.stringify(arr));
     showSuppliers();
 }
 
-function nextInboundStep(step){
-    if(step==="type") showScreen("inbound-step2");
-    if(step==="category"){
-        // populate categories dynamically
-        const catList = $("category-list");
-        catList.innerHTML="";
-        const options = ["Category 1","Category 2","Category 3"];
-        options.forEach(o=>{
-            const btn = document.createElement("button");
-            btn.innerText=o;
-            btn.onclick=()=>{ inboundData.category=o; nextInboundStep('unit'); };
-            catList.appendChild(btn);
-        });
-        showScreen("inbound-step3");
+// Step 2: Type
+function selectType(t) {
+    inboundData.type = t;
+    showCategories();
+}
+
+// Step 3: Category
+function showCategories() {
+    const container = document.getElementById("category-list");
+    container.innerHTML = "";
+    const categories = JSON.parse(localStorage.getItem("categories") || "[]");
+    categories.forEach(c => {
+        const btn = document.createElement("button");
+        btn.textContent = c;
+        btn.onclick = () => { inboundData.category = c; showUnits(); };
+        container.appendChild(btn);
+    });
+    showScreen("inbound-step3");
+}
+
+function addCategory() {
+    const c = prompt("Enter Category");
+    if (!c) return;
+    const arr = JSON.parse(localStorage.getItem("categories") || "[]");
+    arr.push(c);
+    localStorage.setItem("categories", JSON.stringify(arr));
+    showCategories();
+}
+
+// Step 4: Unit
+function showUnits() {
+    const container = document.getElementById("unit-list");
+    container.innerHTML = "";
+    const units = JSON.parse(localStorage.getItem("units") || "[]");
+    units.forEach(u => {
+        const btn = document.createElement("button");
+        btn.textContent = u;
+        btn.onclick = () => { inboundData.unit = u; startScan(); };
+        container.appendChild(btn);
+    });
+    showScreen("inbound-step4");
+}
+
+function addUnit() {
+    const u = prompt("Enter Unit");
+    if (!u) return;
+    const arr = JSON.parse(localStorage.getItem("units") || "[]");
+    arr.push(u);
+    localStorage.setItem("units", JSON.stringify(arr));
+    showUnits();
+}
+
+// Step 5: Scan
+function startScan() {
+    inboundCount = 0;
+    document.getElementById("scan-count").textContent = inboundCount;
+    document.getElementById("scan-info").textContent = "Ready to scan...";
+    showScreen("inbound-step5");
+
+    const scanner = document.getElementById("scanner-input");
+    scanner.value = "";
+    scanner.focus();
+
+    scanner.onkeydown = (e) => {
+        if (e.key === "Enter") {
+            const code = scanner.value.trim();
+            scanner.value = "";
+            if (!code) return;
+            saveInbound(code); // update count immediately
+        }
+    };
+}
+
+function saveInbound(code) {
+    const stock = JSON.parse(localStorage.getItem("stock") || "[]");
+    const store = JSON.parse(localStorage.getItem("store") || "[]");
+
+    const item = {
+        ...inboundData,
+        code,
+        user: currentUser,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString()
+    };
+
+    stock.push(item);
+    store.push(item);
+
+    localStorage.setItem("stock", JSON.stringify(stock));
+    localStorage.setItem("store", JSON.stringify(store));
+
+    inboundCount++;
+    document.getElementById("scan-count").textContent = inboundCount;
+    document.getElementById("scan-info").textContent = `Scanned ${inboundCount} items`;
+}
+
+function restartInboundScan() {
+    inboundCount = 0;
+    document.getElementById("scan-count").textContent = inboundCount;
+    document.getElementById("scan-info").textContent = "Ready to scan...";
+}
+
+// Finish inbound
+function finishInbound() {
+    alert("Inbound complete: " + inboundCount + " items");
+    showScreen(currentUser === "Admin" ? "admin-screen" : "worker-screen");
+}
+
+// =============================
+// OUTBOUND FLOW
+// =============================
+function startOutbound() {
+    showScreen("outbound-screen");
+    renderOutbound();
+}
+
+function addClient() {
+    alert("Add Client placeholder");
+}
+
+function renderOutbound() {
+    const table = document.getElementById("outbound-table");
+    table.innerHTML = "<tr><th>Barcode</th><th>User</th><th>Date</th></tr>";
+    const outbound = JSON.parse(localStorage.getItem("outbound") || "[]");
+    outbound.forEach(item => {
+        table.innerHTML += `<tr><td>${item.code}</td><td>${item.user}</td><td>${item.date}</td></tr>`;
+    });
+}
+
+function exportOutbound() {
+    exportToExcel(JSON.parse(localStorage.getItem("outbound") || "[]"), "Outbound_Report");
+}
+
+// =============================
+// STORE SUMMARY
+// =============================
+function openStore() {
+    showScreen("store-screen");
+    renderStore();
+}
+
+function renderStore() {
+    const table = document.getElementById("store-table");
+    table.innerHTML = "<tr><th>Staff</th><th>Qty</th><th>Category</th></tr>";
+    const store = JSON.parse(localStorage.getItem("store") || "[]");
+    const summary = {};
+    store.forEach(i => {
+        const key = i.user + "|" + i.category;
+        summary[key] = (summary[key] || 0) + 1;
+    });
+    for (const k in summary) {
+        const [user, cat] = k.split("|");
+        table.innerHTML += `<tr><td>${user}</td><td>${summary[k]}</td><td>${cat}</td></tr>`;
     }
-    if(step==="unit") showScreen("inbound-step4");
-    if(step==="scan"){
-        inboundData.price = parseFloat($("inbound-price").value) || 0;
-        showScreen("inbound-step5");
-        initScanner();
-    }
 }
 
-function selectInboundOption(option){
-    inboundData.type = option;
-    nextInboundStep('category');
+function exportStore() {
+    exportToExcel(JSON.parse(localStorage.getItem("store") || "[]"), "Store_Report");
 }
 
-function selectUnit(unit){ inboundData.unit = unit; nextInboundStep('scan'); }
-
-function finishInbound(){
-    alert(`Inbound complete. Total scanned: ${inboundCount}`);
-    showScreen("admin-screen");
+// =============================
+// SELL & RECEIPT
+// =============================
+function openSell() {
+    showScreen("sell-screen");
+    const receipt = document.getElementById("receipt");
+    const stock = JSON.parse(localStorage.getItem("stock") || "[]");
+    let html = "<table><tr><th>Code</th><th>Category</th><th>Unit</th><th>Date</th></tr>";
+    stock.forEach(i => { html += `<tr><td>${i.code}</td><td>${i.category}</td><td>${i.unit}</td><td>${i.date}</td></tr>`; });
+    html += "</table>";
+    receipt.innerHTML = html;
 }
 
-function restartInboundScan(){ inboundCount=0; $("scan-count").innerText=0; $("scan-info").innerText="Ready to scan"; }
-
-// =======================================================
-// ✅ OUTBOUND FLOW
-// =======================================================
-function startOutbound(){
-    outboundCount=0;
-    scannerMode="OUTBOUND";
-    showScreen("outbound-step1");
+function printReceipt() {
+    window.print();
 }
 
-function setOutboundType(type){
-    outboundData={type};
-    showScreen("outbound-step2");
-    initScanner();
+// =============================
+// ANALYTICS
+// =============================
+function openAnalytics() {
+    showScreen("analytics-screen");
+    renderAnalytics();
 }
 
-function finishOutbound(){
-    alert(`Outbound complete. Total scanned: ${outboundCount}`);
-    showScreen("admin-screen");
+function renderAnalytics() {
+    const stock = JSON.parse(localStorage.getItem("stock") || "[]");
+    const outbound = JSON.parse(localStorage.getItem("outbound") || "[]");
+    const store = JSON.parse(localStorage.getItem("store") || "[]");
+    document.getElementById("an-inbound").textContent = stock.length;
+    document.getElementById("an-outbound").textContent = outbound.length;
+    document.getElementById("an-store").textContent = store.length;
+
+    const t = document.getElementById("category-table");
+    t.innerHTML = "<tr><th>Category</th><th>Qty</th></tr>";
+    const cats = {};
+    stock.forEach(i => { cats[i.category] = (cats[i.category] || 0) + 1; });
+    for (const c in cats) t.innerHTML += `<tr><td>${c}</td><td>${cats[c]}</td></tr>`;
 }
 
-function restartOutboundScan(){ outboundCount=0; $("out-scan-count").innerText=0; $("out-scan-info").innerText="Ready to scan"; }
-
-// =======================================================
-// ✅ PROFIT
-// =======================================================
-function filterProfit(period){
-    const total = getProfit();
-    alert(`Profit ${period}: ${total}`);
+function exportAnalytics() {
+    exportToExcel(JSON.parse(localStorage.getItem("stock") || "[]"), "Analytics_Report");
 }
 
-// =======================================================
-// INIT
-// =======================================================
-window.addEventListener("load",()=>{
+// =============================
+// EXCEL EXPORT
+// =============================
+function exportToExcel(data, filename) {
+    if (!data || !data.length) { alert("No data to export"); return; }
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, filename + ".xlsx");
+}
+
+// =============================
+// INIT APP
+// =============================
+window.addEventListener("DOMContentLoaded", () => {
+    initDefaults();
     showScreen("language-screen");
 });
+
 
 
 
