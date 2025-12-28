@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Tikure App</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -13,18 +14,13 @@
 <!-- ========================== -->
 <header id="global-header">
     <div class="header-left">
-        <button id="back-btn" class="back-btn" onclick="goBack()">← Back</button>
+        <button onclick="goBack()">← Back</button>
     </div>
     <div class="header-center">
-        <img id="app-logo" src="logo.png" alt="App Logo">
+        <img src="logo.png" alt="App Logo">
     </div>
     <div class="header-right">
-        <select id="global-lang-select" class="lang-selector" onchange="setLanguage(this.value)">
-            <option value="am">አማርኛ</option>
-            <option value="om">Afaan Oromoo</option>
-            <option value="en">English</option>
-        </select>
-        <button id="top-logout" class="top-logout" onclick="logout()">Logout</button>
+        <button onclick="logout()">Logout</button>
     </div>
 </header>
 
@@ -32,37 +28,19 @@
 <!-- LANGUAGE SCREEN            -->
 <!-- ========================== -->
 <div id="language-screen" class="screen">
-    <h2 class="choose-text">Select Language</h2>
-    <div class="language-buttons">
-        <button onclick="setLanguage('am')" class="lang-btn default">አማርኛ</button>
-        <button onclick="setLanguage('om')" class="lang-btn">Afaan Oromoo</button>
-        <button onclick="setLanguage('en')" class="lang-btn">English</button>
-    </div>
+    <h2>Select Language</h2>
+    <button onclick="setLanguage('am')">አማርኛ</button>
+    <button onclick="setLanguage('om')">Afaan Oromoo</button>
+    <button onclick="setLanguage('en')">English</button>
 </div>
 
 <!-- ========================== -->
 <!-- ROLE SCREEN                -->
 <!-- ========================== -->
 <div id="role-screen" class="screen">
-    <h1 class="app-title">Choose Role</h1>
-    <div class="language-buttons">
-        <button class="lang-btn" onclick="chooseAdmin()">Admin</button>
-        <button class="lang-btn" onclick="chooseWorker()">Worker</button>
-    </div>
-</div>
-
-<!-- ========================== -->
-<!-- ADMIN SETUP SCREEN         -->
-<!-- ========================== -->
-<div id="admin-setup-screen" class="screen">
-    <h1>Create Admin</h1>
-    <div class="input-group">
-        <input id="setup-admin-username" type="text" placeholder="Admin username">
-    </div>
-    <div class="input-group">
-        <input id="setup-admin-password" type="password" placeholder="Admin password">
-    </div>
-    <button class="main-btn" onclick="createInitialAdmin()">Create Admin</button>
+    <h1>Choose Role</h1>
+    <button onclick="chooseAdmin()">Admin</button>
+    <button onclick="chooseWorker()">Worker</button>
 </div>
 
 <!-- ========================== -->
@@ -70,25 +48,22 @@
 <!-- ========================== -->
 <div id="login-screen" class="screen">
     <h1>Login</h1>
-    <div class="input-group">
-        <input id="login-username" type="text" placeholder="Username">
-    </div>
-    <div class="input-group">
-        <input id="login-password" type="password" placeholder="Password">
-    </div>
-    <button class="main-btn" onclick="loginUser()">Login</button>
+    <input id="login-username" type="text" placeholder="Username">
+    <input id="login-password" type="password" placeholder="Password">
+    <button onclick="loginUser()">Login</button>
 </div>
 
 <!-- ========================== -->
 <!-- ADMIN DASHBOARD            -->
 <!-- ========================== -->
 <div id="admin-screen" class="screen">
+    <h2>Admin Dashboard</h2>
     <div class="action-row">
-        <button class="action-btn orange" id="sell-btn">Sell</button>
-        <button class="action-btn blue" id="buy-btn">Buy</button>
-        <button class="action-btn green" id="add-btn">Inbound</button>
-        <button class="action-btn orange" id="remove-btn">Outbound</button>
-        <button class="action-btn blue" id="profit-btn">Profit</button>
+        <button class="action-btn green" onclick="startInbound()">Inbound</button>
+        <button class="action-btn orange" onclick="startOutbound()">Outbound</button>
+        <button class="action-btn blue" onclick="openStore()">Store</button>
+        <button class="action-btn orange" onclick="openSell()">Sell</button>
+        <button class="action-btn blue" onclick="openAnalytics()">Analytics</button>
     </div>
 </div>
 
@@ -96,9 +71,10 @@
 <!-- WORKER DASHBOARD           -->
 <!-- ========================== -->
 <div id="worker-screen" class="screen">
+    <h2>Worker Dashboard</h2>
     <div class="action-row">
-        <button class="action-btn green" id="inbound-btn">Inbound</button>
-        <button class="action-btn orange" id="outbound-btn">Outbound</button>
+        <button class="action-btn green" onclick="startInbound()">Inbound</button>
+        <button class="action-btn orange" onclick="startOutbound()">Outbound</button>
     </div>
 </div>
 
@@ -110,39 +86,31 @@
     <div id="supplier-list" class="step-list"></div>
     <div class="step-controls">
         <button onclick="addSupplier()">➕ Add Supplier</button>
-        <button onclick="nextInboundStep('type')">Next</button>
     </div>
 </div>
 
 <div id="inbound-step2" class="step-screen">
-    <h2>Select Material Type</h2>
+    <h2>Select Type</h2>
     <div class="step-list">
-        <button onclick="selectInboundOption('Liquid')">Liquid</button>
-        <button onclick="selectInboundOption('Solid')">Solid</button>
-        <button onclick="selectInboundOption('Gas')">Gas</button>
+        <button onclick="selectType('Liquid')">Liquid</button>
+        <button onclick="selectType('Solid')">Solid</button>
+        <button onclick="selectType('Gas')">Gas</button>
     </div>
 </div>
 
 <div id="inbound-step3" class="step-screen">
     <h2>Select Category</h2>
-    <div class="step-list" id="category-list"></div>
+    <div id="category-list" class="step-list"></div>
+    <div class="step-controls">
+        <button onclick="addCategory()">➕ Add Category</button>
+    </div>
 </div>
 
 <div id="inbound-step4" class="step-screen">
-    <h2>Pricing Unit & Price</h2>
-    <div class="step-list">
-        <button onclick="selectUnit('per kilo')">Per Kilo</button>
-        <button onclick="selectUnit('per bottle')">Per Bottle</button>
-        <button onclick="selectUnit('per meter')">Per Meter</button>
-        <button onclick="selectUnit('per litre')">Per Litre</button>
-        <button onclick="selectUnit('pallet')">Pallet</button>
-        <button onclick="selectUnit('carton')">Carton</button>
-    </div>
-    <div class="input-group">
-        <input id="inbound-price" type="number" placeholder="Price" />
-    </div>
+    <h2>Select Unit</h2>
+    <div id="unit-list" class="step-list"></div>
     <div class="step-controls">
-        <button onclick="nextInboundStep('scan')">Next</button>
+        <button onclick="addUnit()">➕ Add Unit</button>
     </div>
 </div>
 
@@ -150,60 +118,59 @@
     <h2>Scan Items</h2>
     <div id="scan-count">0</div>
     <p id="scan-info">Ready to scan...</p>
+    <input id="scanner-input" type="text" autocomplete="off" style="position:absolute; left:-1000px; opacity:0;">
     <div class="step-controls">
         <button onclick="finishInbound()">✅ Done</button>
         <button onclick="restartInboundScan()">🔁 Restart</button>
-        <button onclick="showScreen('admin-screen')">🏠 Home</button>
     </div>
 </div>
 
 <!-- ========================== -->
-<!-- OUTBOUND STEPS             -->
+<!-- OUTBOUND SCREEN             -->
 <!-- ========================== -->
-<div id="outbound-step1" class="step-screen">
-    <h2>Outbound Type</h2>
-    <div class="step-list">
-        <button onclick="setOutboundType('direct')">Direct Client</button>
-        <button onclick="setOutboundType('shop')">To Shop Stock</button>
-    </div>
-</div>
-
-<div id="outbound-step2" class="step-screen">
-    <h2>Scan Outbound Items</h2>
-    <div id="out-scan-count">0</div>
-    <p id="out-scan-info">Ready to scan...</p>
-    <div class="step-controls">
-        <button onclick="finishOutbound()">✅ Confirm Stock OUT</button>
-        <button onclick="restartOutboundScan()">🔁 Restart</button>
-        <button onclick="showScreen('worker-screen')">🏠 Home</button>
-    </div>
+<div id="outbound-screen" class="screen">
+    <h2>Outbound Items</h2>
+    <button onclick="addClient()">➕ Add Client</button>
+    <table id="outbound-table">
+        <tr><th>Barcode</th><th>User</th><th>Date</th></tr>
+    </table>
+    <button onclick="exportOutbound()">Export Excel</button>
 </div>
 
 <!-- ========================== -->
-<!-- PROFIT SCREEN              -->
+<!-- STORE SCREEN               -->
 <!-- ========================== -->
-<div id="profit-screen" class="screen">
-    <h2>Profit</h2>
-    <div id="profit-total">0</div>
-    <div class="profit-filters">
-        <button onclick="filterProfit('day')">Per Day</button>
-        <button onclick="filterProfit('week')">Per Week</button>
-        <button onclick="filterProfit('month')">Per Month</button>
-    </div>
+<div id="store-screen" class="screen">
+    <h2>Store Summary</h2>
+    <table id="store-table">
+        <tr><th>Staff</th><th>Qty</th><th>Category</th></tr>
+    </table>
+    <button onclick="exportStore()">Export Excel</button>
 </div>
 
 <!-- ========================== -->
-<!-- Hidden Scanner Input       -->
+<!-- SELL SCREEN                -->
 <!-- ========================== -->
-<input id="scanner-input" type="text" autocomplete="off" style="position:absolute; left:-1000px; opacity:0;" />
+<div id="sell-screen" class="screen">
+    <h2>Sell Receipt</h2>
+    <div id="receipt"></div>
+    <button onclick="printReceipt()">Print</button>
+</div>
+
+<!-- ========================== -->
+<!-- ANALYTICS SCREEN           -->
+<!-- ========================== -->
+<div id="analytics-screen" class="screen">
+    <h2>Analytics</h2>
+    <p>Inbound Items: <span id="an-inbound">0</span></p>
+    <p>Outbound Items: <span id="an-outbound">0</span></p>
+    <p>Store Items: <span id="an-store">0</span></p>
+    <table id="category-table">
+        <tr><th>Category</th><th>Qty</th></tr>
+    </table>
+    <button onclick="exportAnalytics()">Export Excel</button>
+</div>
 
 <script src="app.js"></script>
-
 </body>
 </html>
-
-
-
-
-
-
