@@ -318,15 +318,3 @@ window.addEventListener("DOMContentLoaded", () => {
     initDefaults();
     showScreen("language-screen");
 });
-
-
-
-
-
-
-
-
-
-
-
-
